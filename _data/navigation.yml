@@ -3,11 +3,14 @@ main:
   # - title: "Quick-Start Guide"
   #   url: https://mmistakes.github.io/minimal-mistakes/docs/quick-start-guide/
   - title: "Paper Read"
-    url: https://mmistakes.github.io/minimal-mistakes/about/
-  - title: "Paper Read Posts"
-    url: /year-archive/
+    # url: https://liuquangao.github.io/minimal-mistakes/about/
+  - title: "Paper Read"
+    url: /test/_posts/
+  - title: "Paper Read"
+    url: /test/_posts/
+  
   - title: "About Me"
-    url: /year-archive/
+    url: /test/_posts/
   # - title: "Sample Collections"
   #   url: /collection-archive/
   # - title: "Sitemap"
