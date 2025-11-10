@@ -115,8 +115,8 @@ analytics:
 author:
   name             : "Quangao Liu"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "PhD, Computer Science, University of EXeter"
-  location         : "Exeter,UK"
+  bio              : "PhD Student in Computer Science, University of Exeter"
+  location         : "Exeter, Devon, UK"
   email            : "ql337@exeter.ac.uk"
   links:
     - label: "Email"
