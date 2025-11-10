@@ -1,16 +1,9 @@
 # main links
 main:
-  # - title: "Quick-Start Guide"
-  #   url: https://mmistakes.github.io/minimal-mistakes/docs/quick-start-guide/
-  - title: "Paper Read"
-    # url: https://liuquangao.github.io/minimal-mistakes/about/
-  - title: "Paper Read"
-    url: /test/_posts/
-  - title: "Paper Read"
-    url: /test/_posts/
-  
+  - title: "Posts"
+    url: /posts/
   - title: "About Me"
-    url: /test/_posts/
+    url: /about/
   # - title: "Sample Collections"
   #   url: /collection-archive/
   # - title: "Sitemap"
