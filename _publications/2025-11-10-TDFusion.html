@@ -1,0 +1,712 @@
+---
+title: "TDFusion"
+date: 2025-11-10
+categories:
+  - Paper Read
+  - Computer Vision
+tags:
+  - Image Fusion
+  - Meta Learning
+  - Deep Learning
+layout: none
+---
+<!-- <!DOCTYPE html> -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <title>TDFusion深度解析: 任务驱动的图像融合</title> -->
+    
+    <!-- 1. KaTeX CSS for LaTeX Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <!-- 2. Google Font: Inter (mimics Apple's San Francisco font) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- 3. Embedded CSS for Apple Aesthetic -->
+    <style>
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-card-bg: #ffffff;
+            --apple-text-primary: #1d1d1f;
+            --apple-text-secondary: #333333;
+            --apple-text-tertiary: #555555;
+            --apple-blue: #0071e3;
+            --apple-border: #d2d2d7;
+            --apple-card-radius: 18px;
+            --apple-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        /* --- Base & Typography --- */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text-primary);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1, h2, h3 {
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        h2 {
+            font-size: 32px;
+            border-bottom: 1px solid var(--apple-border);
+            padding-bottom: 15px;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            color: var(--apple-text-primary);
+        }
+        p, li {
+            font-size: 17px;
+            line-height: 1.65;
+            color: var(--apple-text-secondary);
+            margin-bottom: 15px;
+        }
+        ul {
+            padding-left: 25px;
+        }
+        a {
+            color: var(--apple-blue);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        /* --- Header & Nav --- */
+        .header-subtitle {
+            font-size: 20px;
+            text-align: center;
+            color: var(--apple-text-tertiary);
+            margin-bottom: 40px;
+        }
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--apple-border);
+            z-index: 100;
+        }
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            list-style: none;
+            margin: 0;
+            padding: 10px 0;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+        nav li {
+            margin: 5px 15px;
+        }
+        nav a {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 0;
+            color: var(--apple-text-tertiary);
+            transition: color 0.2s ease;
+        }
+        nav a:hover {
+            color: var(--apple-blue);
+            text-decoration: none;
+        }
+        /* --- Section Card --- */
+        .section {
+            background: var(--apple-card-bg);
+            border-radius: var(--apple-card-radius);
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: var(--apple-shadow);
+            scroll-margin-top: 80px; /* Offset for sticky nav */
+        }
+        
+        @media (max-width: 768px) {
+            .section {
+                padding: 25px;
+            }
+            h1 { font-size: 36px; }
+            h2 { font-size: 28px; }
+            h3 { font-size: 22px; }
+        }
+        /* --- Content Elements --- */
+        .term, code {
+            font-family: 'SF Mono', 'Courier New', monospace;
+            background: #f0f0f5;
+            border-radius: 5px;
+            padding: 3px 6px;
+            font-size: 0.9em;
+            color: #d10f4a; /* A subtle highlight color */
+        }
+        .formula-block {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 25px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid var(--apple-border);
+        }
+        .figure, .table-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .placeholder {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            min-height: 300px;
+            background: #fafafa;
+            border: 1px dashed var(--apple-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: #888;
+            padding: 40px;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+        
+        .caption {
+            font-size: 14px;
+            color: var(--apple-text-tertiary);
+            margin-top: 15px;
+            text-align: center;
+        }
+        /* --- Table Styling --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 15px;
+        }
+        
+        table th, table td {
+            border: 1px solid var(--apple-border);
+            padding: 12px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        
+        table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+        /* Highlight best/second best */
+        .best {
+            color: #d10f4a;
+            font-weight: 600;
+        }
+        .second {
+            color: var(--apple-blue);
+            font-weight: 600;
+        }
+        /* --- Reviewer Section --- */
+        blockquote {
+            margin: 20px 0;
+            border-left: 4px solid var(--apple-blue);
+            padding-left: 20px;
+            font-style: italic;
+            color: var(--apple-text-tertiary);
+            font-size: 18px;
+            line-height: 1.7;
+        }
+        .review-list li {
+            font-size: 16px;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- 4. Sticky Navigation -->
+    <nav>
+        <ul>
+            <li><a href="#motivation">研究动机</a></li>
+            <li><a href="#math">数学建模</a></li>
+            <li><a href="#methods">实验设计</a></li>
+            <li><a href="#results">实验结果</a></li>
+            <li><a href="#review">Reviewer 评论</a></li>
+            <li><a href="#onemorething">One More Thing</a></li>
+        </ul>
+    </nav>
+    <!-- 5. Main Content -->
+    <div class="container">
+        
+        <!-- <header>
+            <h1>TDFusion</h1>
+            <p class="header-subtitle">以可学习的融合损失实现任务驱动的图像融合</p>
+        </header> -->
+        <!-- ======================================================= -->
+        <!-- 1. 研究动机 (Motivation) -->
+        <!-- ======================================================= -->
+        <section id="motivation" class="section">
+            <h2>研究动机：为何融合损失需要"学习"？</h2>
+            
+            <p>多模态图像融合（如红外与可见光图像融合）技术，旨在将来自不同传感器的信息聚合起来,生成单一的、信息更丰富的图像。这种融合图像对于下游的高级视觉任务（如语义分割、目标检测）至关重要，因为它能提供比单一来源图像更鲁棒的感知特征。</p>
+            
+            <p><strong>核心问题在于：</strong>目前主流的融合方法，其优化目标（即损失函数）大多是<strong>预先定义 (predefined)</strong> 的。这些固定的损失函数（例如 $L_1$ 损失、SSIM、感知损失等）主要关注于提升图像的视觉质量，比如清晰度、对比度等。</p>
+            
+            <p><strong>发现的"鸿沟" (Gap)：</strong>一个视觉上"好看"的融合图像，并不等同于一个对下游任务"友好"的图像。预定义的损失函数与特定下游任务（如"检测一个远处的小目标"或"分割出物体的精确边缘"）的真正需求之间，存在着<strong>"任务错配" (task mismatch)</strong> 的问题。这种固定的、手动的先验约束限制了模型的灵活性，无法根据具体的任务需求动态调整融合策略。</p>
+            <p><strong>本文的意义 (Significance)：</strong>为了解决这一问题，本文提出了 <span class="term">TDFusion</span>，一个核心思想是<strong>让融合损失函数本身变得可学习</strong>。框架引入了一个"损失生成模块"，它不再使用固定的融合规则，而是通过 <span class="term">meta-learning</span>（元学习）的方式，被下游任务的损失（Task Loss）反向指导。其最终目标是：驱动融合网络 $\mathcal{F}$ 的进化，使其生成的融合图像能够最大程度地<strong>最小化下游任务的损失 $\mathcal{L}_t$</strong>。这使得融合过程真正实现了"任务驱动" (task-driven)，具有极高的适应性和灵活性。</p>
+        </section>
+        <!-- ======================================================= -->
+        <!-- 2. 数学表示及建模 (Mathematical Formulation) -->
+        <!-- ======================================================= -->
+        <section id="math" class="section">
+            <h2>数学表示：TDFusion 的核心机制</h2>
+            <p>TDFusion 框架由三个关键模块组成：融合网络 $\mathcal{F}(\cdot)$（参数为 $\theta_{\mathcal{F}}$）、下游任务网络 $\mathcal{T}(\cdot)$（参数为 $\theta_{\mathcal{T}}$）以及核心的<strong>损失生成模块 $\mathcal{G}(\cdot)$</strong>（参数为 $\theta_{\mathcal{G}}$）。</p>
+            <h3>1. 可学习的融合损失 ($\mathcal{L}_f$)</h3>
+            <p>整个框架的基石是这个可学习的融合损失 $\mathcal{L}_f$，它由强度项 $\mathcal{L}_{f}^{int}$ 和梯度项 $\mathcal{L}_{f}^{grad}$ 构成：</p>
+            <div class="formula-block">
+                $$ \mathcal{L}_{f} = \mathcal{L}_{f}^{int} + \alpha\mathcal{L}_{f}^{grad} $$
+                <p class="caption">(Equation 1)</p>
+            </div>
+            <p><strong>梯度项 ($\mathcal{L}_{f}^{grad}$):</strong> 这是一个常规项，用于保留源图像中显著的纹理细节。它被定义为融合图像 $I_f$ 的梯度与两张源图像 $I_k$ ($k \in \{a, b\}$) 的<strong>最大</strong>梯度之间的 $L_1$ 距离：</p>
+            <div class="formula-block">
+                $$ \mathcal{L}_{f}^{grad} = \frac{1}{HW}\sum_{ij}|\nabla I_{f}^{ij} - \max_{k\in\{a,b\}}(\nabla I_{k}^{ij})| $$
+                <p class="caption">(Equation 3)</p>
+            </div>
+            <p><strong>强度项 ($\mathcal{L}_{f}^{int}$):</strong> 这是 TDFusion 的创新核心。它不是简单地让 $I_f$ 逼近 $I_a$ 或 $I_b$，而是引入了一组由 $\mathcal{G}$ 模块生成的可学习权重 $\{w_a, w_b\}$：</p>
+            <div class="formula-block">
+                $$ \mathcal{L}_{f}^{int} = \frac{1}{HW}\sum_{ij}[\sum_{k\in\{a,b\}} w_{k}^{ij} (I_{f}^{ij} - I_{k}^{ij})^{2}] $$
+                <p class="caption">(Equation 2)</p>
+            </div>
+            <p>其中，$\{w_{a}, w_{b}\} = \mathcal{G}(I_{a}, I_{b})$。$\mathcal{G}$ 模块的输出经过 <span class="term">Softmax</span> 函数，确保在每个像素 $(i, j)$ 上，$w_{a}^{ij} + w_{b}^{ij} = 1$。这意味着 $\mathcal{G}$ 模块学会了在每个像素上，应该更"相信"哪一张源图像，从而动态地为融合损失 $\mathcal{L}_f$ 分配权重。</p>
+            <h3>2. Meta-Learning：训练损失生成器 ($\mathcal{G}$)</h3>
+            <p>如何训练 $\mathcal{G}$ 来生成"最优"的 $\{w_a, w_b\}$ 呢？答案是元学习。训练过程分为"内更新"和"外更新"两个阶段，这在 $\mathcal{G}$ 模块的 $M$ 次迭代中进行：</p>
+            
+            <p><strong>a. 内更新 (Inner Update):</strong></p>
+            <p>在元训练集 $\{I^{mtr}\}$ 上，我们创建融合网络 $\mathcal{F}$ 的一个"克隆"或"代理" $\mathcal{F}'$。这个代理网络使用由当前 $\mathcal{G}$ 生成的损失 $\mathcal{L}_f$ 进行<strong>一次</strong>梯度下降更新，得到更新后的参数 $\theta_{\mathcal{F}'}$：</p>
+            <div class="formula-block">
+                $$ \theta_{\mathcal{F}^{\prime}} = \theta_{\mathcal{F}} - \eta_{\mathcal{F}^{\prime}}\frac{\partial\mathcal{L}_{f}(I_{a}^{mtr}, I_{b}^{mtr}, I_{f}^{mtr};\theta_{\mathcal{G}})}{\partial\theta_{\mathcal{F}}} $$
+                <p class="caption">(Equation 4)</p>
+            </div>
+            <p>这一步的目的是模拟：如果 $\mathcal{F}$ 真的使用了 $\mathcal{L}_f$，它会变成什么样？</p>
+            <p><strong>b. 外更新 (Outer Update):</strong></p>
+            <p>我们使用上一步得到的"代理网络" $\mathcal{F}'$ 来处理元测试集 $\{I^{mts}\}$，生成融合图像 $I_f^{mts} = \mathcal{F}'(I_a^{mts}, I_b^{mts})$。然后，我们将 $I_f^{mts}$ 送入下游任务网络 $\mathcal{T}$，计算出最终的<strong>任务损失 $\mathcal{L}_t$</strong>（例如分割的交叉熵损失）。</p>
+            <p>这个 $\mathcal{L}_t$ 才是我们真正的优化目标。我们计算 $\mathcal{L}_t$ 关于<strong>损失生成器参数 $\theta_{\mathcal{G}}$</strong> 的梯度，并用它来更新 $\mathcal{G}$：</p>
+            <div class="formula-block">
+                $$ \theta_{\mathcal{G}} = \theta_{\mathcal{G}} - \eta_{\mathcal{G}}\frac{\partial\mathcal{L}_{t}(I_{f}^{mts})}{\partial\theta_{\mathcal{G}}} $$
+                <p class="caption">(Equation 6)</p>
+            </div>
+            <p>这个梯度的计算（如 Eq. 7 所示）需要二阶导数（Hessian-vector product），是 MAML 的标准做法。这一步的含义是："更新 $\mathcal{G}$，使得它生成的 $\mathcal{L}_f$ 在内更新中，能让 $\mathcal{F}'$ 产出在任务上表现更好的 $I_f^{mts}$。"</p>
+            <h3>3. 训练融合网络 ($\mathcal{F}$)</h3>
+            <p>在 $\mathcal{G}$ 模块进行了 $M$ 次的元学习迭代更新后，我们得到了一个更优的损失生成器。此时，我们再回到主循环，使用这个更新后的 $\mathcal{G}$ 生成的 $\mathcal{L}_f$ 来对<strong>主融合网络 $\mathcal{F}$</strong> 进行 $N$ 次常规训练：</p>
+            <div class="formula-block">
+                $$ \theta_{\mathcal{F}} = \theta_{\mathcal{F}} - \eta_{\mathcal{F}}\frac{\partial\mathcal{L}_{f}(I_{a}^{ftr}, I_{b}^{ftr}, I_{f}^{ftr};\theta_{\mathcal{G}})}{\partial\theta_{\mathcal{F}}} $$
+                <p class="caption">(Equation 8)</p>
+            </div>
+            <p>这两个过程（训练 $\mathcal{G}$ 和训练 $\mathcal{F}$）交替进行，共同推动模型向着任务最优的方向进化。</p>
+        </section>
+        <!-- ======================================================= -->
+        <!-- 3. 实验方法与实验设计 (Methods & Design) -->
+        <!-- ======================================================= -->
+        <section id="methods" class="section">
+            <h2>实验设计：达到可复现的细节</h2>
+            <p>为了验证 TDFusion 的有效性并确保可复现性，论文提供了详尽的实验设置。</p>
+            <h3>1. 训练超参数</h3>
+            <ul>
+                <li><strong>Epochs ($L$):</strong> 50</li>
+                <li><strong>Loss Gen 迭代 ($M$):</strong> 200 (即每 $N$ 次 $\mathcal{F}$ 训练后， $\mathcal{G}$ 模块会进行 200 次元学习更新)</li>
+                <li><strong>Fusion Net 迭代 ($N$):</strong> 依赖于数据集大小。</li>
+                <li><strong>优化器 (Optimizer):</strong> Adam</li>
+                <li><strong>学习率 (Learning Rate):</strong> $1 \times 10^{-4}$</li>
+                <li><strong>Batch Size:</strong> 2</li>
+                <li><strong>损失权重 ($\alpha$):</strong> 1 (见 Eq. 1)</li>
+                <li><strong>硬件 (Hardware):</strong> 单张 NVIDIA RTX 3090 GPU</li>
+            </ul>
+            <h3>2. 网络架构</h3>
+            <ul>
+                <li><strong>融合网络 $\mathcal{F}(\cdot)$ (Fusion Network):</strong> 采用了 <span class="term">ReFusion [5]</span> 的架构，这是一个基于 <span class="term">Restormer Block (RTB) [74]</span> 的轻量级模型。</li>
+                <li><strong>损失生成模块 $\mathcal{G}(\cdot)$ (Loss Gen Module):</strong> 同样采用了 <span class="term">Restormer Block (RTB)</span> 作为其骨干。输入为 $\{I_a, I_b\}$，经过 RTB 和一个 $Softmax(\cdot)$ 层后，输出权重 $\{w_a, w_b\}$。</li>
+                <li><strong>任务网络 $\mathcal{T}(\cdot)$ (Task Network):</strong> 在元学习阶段，为了效率，使用了<strong>最轻量级</strong>的任务模型：
+                    <ul>
+                        <li><strong>语义分割:</strong> SegFormer [9] (轻量版)</li>
+                        <li><strong>目标检测:</strong> YOLOv8 [19] (轻量版)</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>3. 数据集与基线 (Datasets & Baselines)</h3>
+            <ul>
+                <li><strong>数据集 (Datasets):</strong>
+                    <ul>
+                        <li><span class="term">MSRS [58]:</span> 1083 训练 / 361 测试 (用于语义分割)</li>
+                        <li><span class="term">FMB [34]:</span> 1220 训练 / 280 测试 (用于语义分割)</li>
+                        <li><span class="term">M3FD [32]:</span> 4200 总数。划分为 3150 训练 / 1050 测试 (用于目标检测)</li>
+                        <li><span class="term">LLVIP [17]:</span> 12025 训练 / 3463 测试。由于数据量过大，论文对其进行了<strong>每 10 帧采样 1 帧</strong>的降采样，最终使用 1203 训练 / 347 测试 (用于目标检测)。</li>
+                    </ul>
+                </li>
+                <li><strong>对比基线 (Baselines):</strong>
+                    TarDAL [32], SegMIF [34], MURF [69], EMMA [86], DCINN [61], MRFS [76], TIMFusion [40].
+                </li>
+            </ul>
+            
+            <h3>4. 评估流程 (Evaluation Protocol)</h3>
+            <p>这是复现的关键：为了公平比较不同融合方法对下游任务的影响，作者们执行了以下流程：</p>
+            <ol>
+                <li>使用 TDFusion 和所有 7 种基线方法，在4个数据集的测试集上生成融合后的图像。</li>
+                <li>对于<strong>每一种</strong>融合方法（共 8 种）生成的融合图像，都<strong>从头开始 (from scratch)</strong> 在其上训练对应的下游任务网络（SegFormer 或 YOLOv8）。</li>
+                <li><strong>训练 300 个 epochs</strong>，然后报告该任务网络在测试集上的性能。</li>
+            </ol>
+            <p><strong>评估指标 (Metrics):</strong></p>
+            <ul>
+                <li><strong>融合质量:</strong> EN, SF, SCD, VIF, $Q^{AB/F}$, SSIM</li>
+                <li><strong>语义分割:</strong> mAcc (mean Accuracy), mIoU (mean Intersection over Union)</li>
+                <li><strong>目标检测:</strong> mAP50 (mAP@.5), mAP75 (mAP@.75)</li>
+            </ul>
+        </section>
+        <!-- ======================================================= -->
+        <!-- 4. 实验结果及核心结论 (Results & Conclusion) -->
+        <!-- ======================================================= -->
+        <section id="results" class="section">
+            <h2>实验结果：数据验证</h2>
+            
+            <h3>1. 融合质量 (Figure 2, Table 1)</h3>
+            <p>首先，在传统的图像融合指标上，TDFusion 表现出色。论文中的 <span class="term">Figure 2</span> (视觉对比) 显示 TDFusion 能有效保留红外图像中的显著目标（如行人）和可见光图像中的背景细节（如路灯光晕），同时实现均衡的亮度和高对比度。</p>
+            <p>在定量指标 (Table 1) 上，TDFusion 在四个数据集上均取得了 SOTA 或次优的成绩，尤其是在 EN, SF, SCD 等指标上优势明显，证明了其融合图像的鲁棒性和高信息量。</p>
+            
+            <div class="figure">
+                <div class="placeholder">
+                    <strong>[Figure 2. 融合结果视觉对比]</strong>
+                    <p style="text-align: center; font-size: 15px;">此处为论文中 Figure 2 的占位符。<br>图像显示 TDFusion (最右列) 在 MSRS, FMB, M3FD, LLVIP 数据集上的融合结果，对比其他7种方法，在保留红外目标和可见光纹理方面表现更优越。</p>
+                </div>
+                <p class="caption">Figure 2. 视觉对比。TDFusion 在各种场景下均能生成更自然、细节更清晰的图像。</p>
+            </div>
+            
+            <p>下表（节选自论文 Table 1）展示了在 FMB 和 LLVIP 数据集上的定量对比：</p>
+            <div class="table-container">
+                <p class="caption" style="font-weight: 600;">Table 1 (节选): 图像融合质量定量对比</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dataset</th>
+                            <th>Method</th>
+                            <th>EN $\uparrow$</th>
+                            <th>SF $\uparrow$</th>
+                            <th>SCD $\uparrow$</th>
+                            <th>VIF $\uparrow$</th>
+                            <th>$Q^{AB/F}$ $\uparrow$</th>
+                            <th>SSIM $\uparrow$</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="4"><strong>FMB [34]</strong></td>
+                            <td>TarDAL [32]</td>
+                            <td>6.63</td>
+                            <td>6.94</td>
+                            <td>1.03</td>
+                            <td>0.28</td>
+                            <td>0.29</td>
+                            <td>0.74</td>
+                        </tr>
+                        <tr>
+                            <td>SegMIF [34]</td>
+                            <td>6.83</td>
+                            <td>13.69</td>
+                            <td>1.72</td>
+                            <td>0.39</td>
+                            <td>0.65</td>
+                            <td>0.60</td>
+                        </tr>
+                        <tr>
+                            <td>MRFS [76]</td>
+                            <td>6.78</td>
+                            <td class="second">12.42</td>
+                            <td>1.24</td>
+                            <td>0.38</td>
+                            <td>0.62</td>
+                            <td>0.73</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TDFusion (Ours)</strong></td>
+                            <td class="best">6.86</td>
+                            <td class="best">14.16</td>
+                            <td class="best">1.76</td>
+                            <td class="best">0.43</td>
+                            <td class="best">0.68</td>
+                            <td class="best">0.75</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="4"><strong>LLVIP [17]</strong></td>
+                            <td>EMMA [86]</td>
+                            <td class="second">7.35</td>
+                            <td>15.37</td>
+                            <td>1.57</td>
+                            <td class="second">0.64</td>
+                            <td>0.41</td>
+                            <td class="second">0.66</td>
+                        </tr>
+                        <tr>
+                            <td>MRFS [76]</td>
+                            <td>6.83</td>
+                            <td>11.04</td>
+                            <td>1.23</td>
+                            <td>0.31</td>
+                            <td>0.42</td>
+                            <td>0.64</td>
+                        </tr>
+                        <tr>
+                            <td>TIMFusion [40]</td>
+                            <td>6.58</td>
+                            <td>13.52</td>
+                            <td>1.14</td>
+                            <td>0.33</td>
+                            <td>0.46</td>
+                            <td>0.64</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TDFusion (Ours)</strong></td>
+                            <td class="best">7.36</td>
+                            <td class="best">16.38</td>
+                            <td class="best">1.75</td>
+                            <td class="best">0.46</td>
+                            <td class="best">0.70</td>
+                            <td class="best">0.67</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>2. 下游任务性能 (Figure 3, 4, Table 2)</h3>
+            <p><strong>这才是 TDFusion 真正的"考场"。</strong>如 <span class="term">Figure 3</span> (分割) 和 <span class="term">Figure 4</span> (检测) 所示，TDFusion 生成的融合图像使得下游模型能产生更清晰的分割边界和更准确的检测框。</p>
+            <p>定量结果 (Table 2) 证实了这一点：TDFusion 在<strong>所有四个数据集、两个下游任务上均取得了最佳性能</strong>。这有力地证明了其核心论点：通过元学习优化融合损失，可以显著提升融合图像对下游任务的"友好度"。</p>
+            <div class="figure">
+                <div class="placeholder">
+                    <strong>[Figure 3 & 4. 下游任务视觉对比]</strong>
+                    <p style="text-align: center; font-size: 15px;">此处为 Figure 3 (分割) 和 Figure 4 (检测) 的占位符。<br>图像显示，基于 TDFusion 融合图像训练的任务模型，其分割掩码 (mask) 和检测框 (bbox) 都最接近 Ground Truth。</p>
+                </div>
+            </div>
+            <div class="table-container">
+                <p class="caption" style="font-weight: 600;">Table 2: 下游任务性能对比</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Method</th>
+                            <th colspan="2">语义分割 (MSRS)</th>
+                            <th colspan="2">语义分割 (FMB)</th>
+                            <th colspan="2">目标检测 (M3FD)</th>
+                            <th colspan="2">目标检测 (LLVIP)</th>
+                        </tr>
+                        <tr>
+                            <th>mAcc $\uparrow$</th>
+                            <th>mIoU $\uparrow$</th>
+                            <th>mAcc $\uparrow$</th>
+                            <th>mIoU $\uparrow$</th>
+                            <th>mAP50 $\uparrow$</th>
+                            <th>mAP75 $\uparrow$</th>
+                            <th>AP50 $\uparrow$</th>
+                            <th>AP75 $\uparrow$</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Infrared</td>
+                            <td>83.23</td>
+                            <td>69.49</td>
+                            <td>58.85</td>
+                            <td>51.98</td>
+                            <td>79.12</td>
+                            <td>53.05</td>
+                            <td>96.03</td>
+                            <td>72.07</td>
+                        </tr>
+                        <tr>
+                            <td>Visible</td>
+                            <td>83.44</td>
+                            <td>73.76</td>
+                            <td>57.96</td>
+                            <td>65.12</td>
+                            <td>82.21</td>
+                            <td>54.82</td>
+                            <td>48.66</td>
+                            <td>91.78</td>
+                        </tr>
+                        <tr>
+                            <td>SegMIF [34]</td>
+                            <td>85.73</td>
+                            <td>74.25</td>
+                            <td>65.97</td>
+                            <td>58.41</td>
+                            <td>83.61</td>
+                            <td>58.23</td>
+                            <td>93.95</td>
+                            <td>66.45</td>
+                        </tr>
+                        <tr>
+                            <td>MRFS [76]</td>
+                            <td>84.76</td>
+                            <td>74.50</td>
+                            <td>61.93</td>
+                            <td>55.71</td>
+                            <td>83.28</td>
+                            <td>57.74</td>
+                            <td>93.03</td>
+                            <td>67.21</td>
+                        </tr>
+                        <tr>
+                            <td>TIMFusion [40]</td>
+                            <td>83.67</td>
+                            <td>73.58</td>
+                            <td class="second">63.70</td>
+                            <td>57.24</td>
+                            <td>83.22</td>
+                            <td>56.08</td>
+                            <td>93.76</td>
+                            <td>61.33</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TDFusion (Ours)</strong></td>
+                            <td class="best">86.04</td>
+                            <td class="best">75.09</td>
+                            <td class="best">67.17</td>
+                            <td class="best">60.50</td>
+                            <td class="best">86.27</td>
+                            <td class="best">59.71</td>
+                            <td class="best">95.00</td>
+                            <td class="best">69.18</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>3. 核心洞察：$\mathcal{L}_f$ 学到了什么？ (Figure 5)</h3>
+            <p>这是论文中最具洞察力的部分。为了探究可学习损失 $\mathcal{L}_f$ 究竟学到了什么，作者将为"语义分割 (SS)"任务训练的 $\mathcal{G}$ 和为"目标检测 (OD)"任务训练的 $\mathcal{G}$ 进行了可视化 (Figure 5)。</p>
+            <p>结果发现：</p>
+            <ul>
+                <li>为<strong>语义分割</strong>任务（FMB 数据集）训练的损失权重 $\{w_a^{SS}, w_b^{SS}\}$，更倾向于<strong>保留可见光图像中的纹理和结构</strong>，以及红外图像在弱光下的边界信息。这有助于模型区分不同的语义区域。</li>
+                <li>为<strong>目标检测</strong>任务（LLVIP 数据集）训练的损失权重 $\{w_a^{OD}, w_b^{OD}\}$，则表现出明显不同的偏好。它更关注<strong>高对比度的边缘信息</strong>，特别是行人和车辆等目标。它会给红外图像中的高亮（发热）区域分配更高的权重，以确保目标不会丢失。</li>
+            </ul>
+            <p><strong>结论：</strong>TDFusion 成功地让 $\mathcal{G}$ 模块学会了针对不同下游任务，从源图像中提取最相关信息的不同融合策略。这证明了可学习损失的必要性和有效性。</p>
+            <div class="figure">
+                <div class="placeholder">
+                    <strong>[Figure 5. 可学习损失的可视化]</strong>
+                    <p style="text-align: center; font-size: 15px;">此处为 Figure 5 的占位符。<br>图像展示了 $w_a^{SS}$ (分割任务的红外权重) 和 $w_a^{OD}$ (检测任务的红外权重) 的热力图。两者表现出明显差异，证明了融合策略的任务特异性。</p>
+                </div>
+                <p class="caption">Figure 5. 可视化分析。不同任务学到的融合权重（偏好）是截然不同的。</p>
+            </div>
+            
+            <h3>4. 消融实验 (Table 3)</h3>
+            <p>论文通过一系列消融实验证明了框架中每个组件的必要性（在 FMB 数据集上进行）：</p>
+            <ul>
+                <li><strong>Exp. I (固定权重):</strong> 将 $\{w_a, w_b\}$ 固定为 0.5，所有指标（融合与任务）均显著下降。证明了<strong>可学习的权重 $\mathcal{G}$ 模块是核心</strong>。</li>
+                <li><strong>Exp. II (去除 $\mathcal{L}_{f}^{grad}$):</strong> 性能下降。证明了保留最大梯度项对细节很重要。</li>
+                <li><strong>Exp. III (任务损失 $\mathcal{L}_t$ 联合训练 $\mathcal{F}$):</strong> 性能下降。证明了<strong>元学习的两阶段优化（先 $\mathcal{G}$ 后 $\mathcal{F}$）优于</strong>朴素的联合训练。</li>
+                <li><strong>Exp. IV (去除 $\mathcal{F}$ 的独立学习):</strong> 性能下降。证明了 $\mathcal{F}$ 和 $\mathcal{G}$ 的交替学习机制是必要的。</li>
+                <li><strong>Exp. V (用简单加权替换 $\mathcal{F}$):</strong> 性能大幅下降。证明了需要一个强大的融合网络 $\mathcal{F}$，而不能简单地用 $I_f = w_a I_a + w_b I_b$ 来代替。</li>
+            </ul>
+        </section>
+        <!-- ======================================================= -->
+        <!-- 5. 你的评论 (Reviewer's Comments) -->
+        <!-- ======================================================= -->
+        <section id="review" class="section">
+            <h2>Reviewer's Comments：犀利点评</h2>
+            
+            <blockquote>
+                "TDFusion 是一项非常出色且立意新颖的工作。它准确地抓住了当前多模态融合领域的核心痛点——即融合质量与下游任务性能的'解耦'(decoupling) 问题，并为此提供了一个极其精巧（elegant）的解决方案。"
+            </blockquote>
+            <h3 style="color: #2a8a3a;">优势 (Strengths)</h3>
+            <ul class="review-list">
+                <li><strong>1. 根本性的创新 (Novelty):</strong> 最大的亮点在于将"融合损失"从一个固定的超参数，转变为一个由任务驱动的可学习模块 $\mathcal{G}$。这是对"什么是好的融合"这一根本问题的重新定义。</li>
+                <li><strong>2. 坚实的理论 (Soundness):</strong> 采用 MAML 框架进行元学习，在理论上非常坚实。Inner/Outer loop 的设计（用 $\mathcal{L}_t$ 指导 $\theta_{\mathcal{G}}$，再用 $\mathcal{L}_f$ 指导 $\theta_{\mathcal{F}}$）逻辑闭环，直指目标。</li>
+                <li><strong>3. 详尽的实验 (Thoroughness):</strong> 实验设计堪称典范。覆盖4个数据集、2个主流下游任务，并采用了极其公平的"逐个重训"评估方式。Ablation (消融实验) 逻辑清晰，有力地支撑了各个组件的必要性。</li>
+                <li><strong>4. 深刻的洞察 (Insight):</strong> Figure 5 的可视化分析是本文的"点睛之笔"。它直观地证明了不同任务 *确实* 需要不同的融合策略，将 TDFusion 的"黑盒"打开，使其结论令人信服。</li>
+            </ul>
+            <h3 style="color: #d10f4a;">不足与局限 (Weaknesses & Limitations)</h3>
+            <ul class="review-list">
+                <li><strong>1. 训练的复杂性与开销:</strong> 这是一个三级嵌套优化问题（Epoch L $\rightarrow$ Fusion Net N $\rightarrow$ Loss Gen M）。$M=200$ 的元学习迭代意味着巨大的计算开销。收敛性和稳定性可能对超参（如 $\eta_{\mathcal{F}^{\prime}}, \eta_{\mathcal{G}}$）非常敏感。</li>
+                <li><strong>2. 对下游标注的强依赖:</strong> 框架虽然"任务不可知"(task-agnostic)，但它强依赖于一个<strong>带标注的下游任务数据集</strong>。这使得融合模型的训练成本与获取下游任务（如分割、检测）的昂贵标注深度绑定。这对于无监督融合场景并不适用。</li>
+                <li><strong>3. 二阶梯度的实现模糊性:</strong> Eq. 7 涉及到二阶导数（Hessian-vector product），这是 MAML 的标准，但计算量极大。论文没有明确说明是实现了完整的二阶 MAML，还是使用了一阶近似（如 FO-MAML, Reptile）。在单张 3090 上跑二阶 MAML 可能会非常慢。</li>
+                <li><strong>4. 任务模型的迁移性:</strong> 元学习阶段为了效率使用了"轻量级"的任务模型（SegFormer-light, YOLOv8-n）。但最终评估时（Table 2），是用的这些轻量模型，还是更强的 SOTA 模型？论文提到 "adopt SegFormer [9] and YOLOv8 [19]"，但没有详述是哪个版本。如果 $\mathcal{G}$ 学到的损失只是对"轻量模型"最优，它是否能平滑迁移到"重量级模型"上？这一点有待商榷。</li>
+            </ul>
+            <h3 style="color: var(--apple-blue);">可能的改进方向 (Improvements)</h3>
+            <ul class="review-list">
+                <li><strong>1. 探索一阶元学习:</strong> 明确对比完整二阶 MAML 与 FO-MAML (First-Order MAML) 等近似算法在 TDFusion 框架下的表现。如果一阶近似能达到 95% 的性能，但节省 50% 的训练时间，那将是非常有价值的。</li>
+                <li><strong>2. 迈向自监督/无监督任务:</strong> 能否将 $\mathcal{L}_t$ 替换为一个自监督或无监督的损失？例如，使用对比学习 (Contrastive Loss) 作为 $\mathcal{L}_t$，或者使用一个图像重建（如 Inpainting）的代理任务 (pretext task)。这将使 TDFusion 摆脱对昂贵标注的依赖，极大拓展其应用范围。</li>
+                <li><strong>3. $\mathcal{G}$ 模块的架构搜索:</strong> $\mathcal{G}$ 模块目前使用了强大的 RTB 架构。$\mathcal{G}$ 到底需要多复杂？一个简单的浅层 CNN 是否也能学到有意义的 $w_a, w_b$？对 $\mathcal{G}$ 进行架构上的消融和探索，有助于我们理解"学习一个损失函数"这件事本身的难度。</li>
+            </ul>
+        </section>
+        <!-- ======================================================= -->
+        <!-- 6. One More Thing -->
+        <!-- ======================================================= -->
+        <section id="onemorething" class="section">
+            <h2>One More Thing：TDFusion 训练全流程 (Algorithm 1)</h2>
+            <p>为了达到"可复现"的目标，TDFusion 的核心训练算法 (Algorithm 1) 值得我们单独梳理。整个流程是一个精妙的交替优化：</p>
+            
+            <p><strong>初始化:</strong> 随机初始化融合网络 $\mathcal{F}$ (参数 $\theta_{\mathcal{F}}$), 任务网络 $\mathcal{T}$ (参数 $\theta_{\mathcal{T}}$), 和损失生成器 $\mathcal{G}$ (参数 $\theta_{\mathcal{G}}$)。</p>
+            <h3 style="margin-top: 10px;">For epoch = 1 to L:</h3>
+            <ol style="font-size: 16px; line-height: 1.7;">
+                <li>从总训练集 $\{I^{ftr}\}$ 中随机采样，划分为元训练集 $\{I^{mtr}\}$ 和元测试集 $\{I^{mts}\}$。</li>
+                
+                <li style="margin-top: 15px;"><strong>阶段一：元学习更新 $\mathcal{G}$ (共 M 次)</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>For step = 1 to M:</strong>
+                            <ol type="a">
+                                <li><strong>(内更新)</strong> 在 $\{I^{mtr}\}$ 上，计算 $\mathcal{L}_f = \mathcal{G}(I_a, I_b, \mathcal{F}(...))$，并计算梯度 $\nabla_{\theta_{\mathcal{F}}} \mathcal{L}_f$。</li>
+                                <li>根据 Eq. 4 生成"代理"网络参数 $\theta_{\mathcal{F}'} \leftarrow \theta_{\mathcal{F}} - ...$</li>
+                                <li>(同时更新代理任务网络 $\theta_{\mathcal{T}'}$)</li>
+                                <li><strong>(外更新)</strong> 在 $\{I^{mts}\}$ 上，使用"代理网络" $\mathcal{F}'$ 计算 $I_f^{mts}$。</li>
+                                <li>计算任务损失 $\mathcal{L}_t = \mathcal{T}'(I_f^{mts})$。</li>
+                                <li>根据 Eq. 6 计算梯度 $\nabla_{\theta_{\mathcal{G}}} \mathcal{L}_t$，并<strong>更新 $\theta_{\mathcal{G}}$</strong>。</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </li>
+                <li style="margin-top: 15px;"><strong>阶段二：常规训练更新 $\mathcal{F}$ 和 $\mathcal{T}$ (共 N 次)</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>For step = 1 to N:</strong>
+                            <ol type="a">
+                                <li>从总训练集 $\{I^{ftr}\}$ 采样。</li>
+                                <li>使用<strong>当前 $\mathcal{G}$</strong> (已在阶段一中更新) 生成 $\mathcal{L}_f$。</li>
+                                <li>根据 Eq. 8 计算梯度 $\nabla_{\theta_{\mathcal{F}}} \mathcal{L}_f$，并<strong>更新 $\theta_{\mathcal{F}}$</strong>。</li>
+                                <li>计算任务损失 $\mathcal{L}_t = \mathcal{T}(\mathcal{F}(...))$。</li>
+                                <li>根据 Eq. 9 计算梯度 $\nabla_{\theta_{\mathcal{T}}} \mathcal{L}_t$，并<strong>更新 $\theta_{\mathcal{T}}$</strong>。</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+            <p>...重复 L 个 Epochs，直到模型收敛。</p>
+        </section>
+    </div> <!-- end .container -->
+    <!-- 6. KaTeX JS for LaTeX Rendering -->
+    <!-- (Must be placed at the end of body) -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError : false
+        });"></script>
+</body>
+</html>
+
