@@ -1,4 +1,5 @@
 ---
+hidden: true
 title: "Example Publication: Deep Learning for Computer Vision"
 excerpt: "这是一篇示例论文，展示如何在 Publications 页面中展示你的学术成果。"
 date: 2024-03-15
