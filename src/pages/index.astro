@@ -1,0 +1,153 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SocialIcons from '../components/SocialIcons.astro';
+import PublicationCard from '../components/PublicationCard.astro';
+import { profile } from '../data/profile';
+import { publications } from '../data/publications';
+import { withBase, formatDate } from '../utils/url';
+
+const selectedPubs = publications.filter((p) => p.selected);
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const recentPosts = allPosts.slice(0, 3);
+---
+
+<BaseLayout title={profile.siteTitle} description={profile.siteDescription}>
+  <!-- Hero Section: Bio Left, Avatar Right -->
+  <section class="flex flex-col-reverse sm:flex-row items-start justify-between gap-8 sm:gap-10">
+    <div class="flex-1 min-w-0">
+      <h1 class="font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+        {profile.name}
+      </h1>
+      <p class="mt-2 text-base font-medium text-blue-700 dark:text-blue-400">
+        {profile.role}
+      </p>
+      <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+        {profile.affiliation} &middot; {profile.office}
+      </p>
+
+      <div class="mt-5 space-y-3.5 text-[0.96rem] text-slate-700 dark:text-slate-300 leading-relaxed">
+        {profile.bio.map((paragraph) => (
+          <p set:html={paragraph} />
+        ))}
+      </div>
+
+      <!-- Social Links -->
+      <div class="mt-6 flex flex-wrap items-center gap-2">
+        {profile.socials.map((item) => (
+          <a
+            href={item.href}
+            target={item.href.startsWith('http') ? '_blank' : undefined}
+            rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+          >
+            <SocialIcons name={item.icon} class="w-3.5 h-3.5" />
+            <span>{item.label}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Portrait Avatar -->
+    <div class="w-32 sm:w-44 shrink-0 self-start">
+      <img
+        src={withBase(profile.avatar)}
+        alt={profile.avatarAlt}
+        class="w-32 h-32 sm:w-44 sm:h-44 rounded-2xl object-cover border border-slate-200/90 dark:border-slate-800 shadow-xs"
+      />
+    </div>
+  </section>
+
+  <!-- Research Interests -->
+  <section class="mt-12 pt-8 border-t border-slate-200/80 dark:border-slate-800/80">
+    <h2 class="font-serif text-xl font-semibold text-slate-900 dark:text-slate-100">
+      Research Interests
+    </h2>
+    <ul class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm text-slate-700 dark:text-slate-300">
+      {profile.researchInterests.map((interest) => (
+        <li class="flex items-start gap-2.5">
+          <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0" />
+          <span>{interest}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- News & Updates -->
+  <section class="mt-12 pt-8 border-t border-slate-200/80 dark:border-slate-800/80">
+    <h2 class="font-serif text-xl font-semibold text-slate-900 dark:text-slate-100">
+      News
+    </h2>
+    <ul class="mt-4 space-y-3 text-sm">
+      {profile.news.map((item) => (
+        <li class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
+          <span class="font-mono text-xs text-slate-500 dark:text-slate-400 sm:w-20 shrink-0">
+            {item.date}
+          </span>
+          <span class="text-slate-700 dark:text-slate-300 leading-relaxed" set:html={item.content} />
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- Selected Publications -->
+  <section class="mt-12 pt-8 border-t border-slate-200/80 dark:border-slate-800/80">
+    <div class="flex items-baseline justify-between gap-4">
+      <h2 class="font-serif text-xl font-semibold text-slate-900 dark:text-slate-100">
+        Selected Publications
+      </h2>
+      <a href={withBase('/publications')} class="text-sm font-medium text-blue-700 dark:text-blue-400 hover:underline">
+        All publications &rarr;
+      </a>
+    </div>
+    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+      * denotes equal contribution.
+    </p>
+
+    <div class="mt-3">
+      {selectedPubs.map((pub) => (
+        <PublicationCard pub={pub} showThumbnail={true} />
+      ))}
+    </div>
+  </section>
+
+  <!-- Recent Blog Posts -->
+  {recentPosts.length > 0 && (
+    <section class="mt-12 pt-8 border-t border-slate-200/80 dark:border-slate-800/80">
+      <div class="flex items-baseline justify-between gap-4">
+        <h2 class="font-serif text-xl font-semibold text-slate-900 dark:text-slate-100">
+          Recent Notes &amp; Writing
+        </h2>
+        <a href={withBase('/blog')} class="text-sm font-medium text-blue-700 dark:text-blue-400 hover:underline">
+          All posts &rarr;
+        </a>
+      </div>
+
+      <div class="mt-4 divide-y divide-slate-200/75 dark:divide-slate-800/75">
+        {recentPosts.map((post) => (
+          <article class="py-4 first:pt-1">
+            <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+              <a
+                href={withBase(`/blog/${post.id}`)}
+                class="font-medium text-slate-900 dark:text-slate-100 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+              >
+                {post.data.title}
+              </a>
+              <time
+                datetime={post.data.pubDate.toISOString()}
+                class="font-mono text-xs text-slate-500 dark:text-slate-400 shrink-0"
+              >
+                {formatDate(post.data.pubDate)}
+              </time>
+            </div>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+              {post.data.description}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>

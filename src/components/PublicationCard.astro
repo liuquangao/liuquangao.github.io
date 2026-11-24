@@ -1,0 +1,198 @@
+---
+import type { Publication } from '../data/publications';
+import { withBase } from '../utils/url';
+
+interface Props {
+  pub: Publication;
+  showThumbnail?: boolean;
+}
+
+const { pub, showThumbnail = true } = Astro.props;
+const hasThumb = showThumbnail && Boolean(pub.thumbnail);
+---
+
+<article
+  id={pub.id}
+  class="pub-item group py-5 first:pt-2 border-b border-slate-200/75 dark:border-slate-800/75 last:border-b-0"
+  data-year={String(pub.year)}
+  data-type={pub.type}
+  data-tags={pub.tags.join('|')}
+>
+  <div class:list={['flex flex-col gap-4', hasThumb && 'sm:flex-row sm:items-start']}>
+    {hasThumb && pub.thumbnail && (
+      <div class="sm:w-40 shrink-0">
+        <img
+          src={withBase(pub.thumbnail)}
+          alt={`Illustration for ${pub.title}`}
+          loading="lazy"
+          class="w-full sm:w-40 h-28 sm:h-25 object-cover rounded-lg border border-slate-200/90 dark:border-slate-800 bg-slate-50 dark:bg-slate-900"
+        />
+      </div>
+    )}
+
+    <div class="flex-1 min-w-0">
+      <!-- Title -->
+      <h3 class="text-[1.03rem] font-semibold leading-snug text-slate-900 dark:text-slate-100">
+        {pub.links.doi || pub.links.arxiv || pub.links.pdf ? (
+          <a
+            href={pub.links.doi || pub.links.arxiv || pub.links.pdf}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+          >
+            {pub.title}
+          </a>
+        ) : (
+          pub.title
+        )}
+      </h3>
+
+      <!-- Authors -->
+      <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+        {pub.authors.map((author, idx) => {
+          const isMe = pub.highlightAuthor && author.includes(pub.highlightAuthor);
+          return (
+            <>
+              {isMe ? (
+                <strong class="font-semibold text-slate-900 dark:text-slate-100 underline decoration-slate-300 dark:decoration-slate-600 underline-offset-2">
+                  {author}
+                </strong>
+              ) : (
+                <span>{author}</span>
+              )}
+              {idx < pub.authors.length - 1 ? ', ' : ''}
+            </>
+          );
+        })}
+      </p>
+
+      <!-- Venue & Award -->
+      <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+        <span class="italic text-slate-700 dark:text-slate-300">{pub.venue}</span>
+        {pub.award && (
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full font-medium bg-amber-50 text-amber-800 border border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60">
+            ★ {pub.award}
+          </span>
+        )}
+      </div>
+
+      <!-- Action Pills -->
+      <div class="mt-3 flex flex-wrap items-center gap-1.5">
+        <button
+          type="button"
+          class="pub-toggle-btn inline-flex items-center px-2.5 py-1 rounded text-xs font-medium border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors cursor-pointer"
+          data-target={`abstract-${pub.id}`}
+          aria-expanded="false"
+        >
+          Abstract
+        </button>
+
+        <button
+          type="button"
+          class="pub-toggle-btn inline-flex items-center px-2.5 py-1 rounded text-xs font-medium border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors cursor-pointer"
+          data-target={`bibtex-${pub.id}`}
+          aria-expanded="false"
+        >
+          BibTeX
+        </button>
+
+        {pub.links.pdf && (
+          <a href={pub.links.pdf} target="_blank" rel="noopener noreferrer" class="pub-pill">
+            PDF
+          </a>
+        )}
+        {pub.links.arxiv && (
+          <a href={pub.links.arxiv} target="_blank" rel="noopener noreferrer" class="pub-pill">
+            arXiv
+          </a>
+        )}
+        {pub.links.doi && (
+          <a href={pub.links.doi} target="_blank" rel="noopener noreferrer" class="pub-pill">
+            DOI
+          </a>
+        )}
+        {pub.links.code && (
+          <a href={pub.links.code} target="_blank" rel="noopener noreferrer" class="pub-pill">
+            Code
+          </a>
+        )}
+        {pub.links.slides && (
+          <a href={pub.links.slides} target="_blank" rel="noopener noreferrer" class="pub-pill">
+            Slides
+          </a>
+        )}
+      </div>
+
+      <!-- Expandable Abstract -->
+      <div
+        id={`abstract-${pub.id}`}
+        class="hidden mt-3 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-300 leading-relaxed"
+      >
+        {pub.abstract}
+      </div>
+
+      <!-- Expandable BibTeX -->
+      <div
+        id={`bibtex-${pub.id}`}
+        class="hidden mt-3 rounded-lg bg-slate-50 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 overflow-hidden"
+      >
+        <div class="flex items-center justify-between px-3.5 py-1.5 border-b border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+          <span class="font-mono">BibTeX</span>
+          <button
+            type="button"
+            class="copy-bibtex-btn font-medium text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
+            data-bibtex={pub.bibtex}
+          >
+            Copy
+          </button>
+        </div>
+        <pre class="p-3.5 text-xs font-mono text-slate-700 dark:text-slate-300 overflow-x-auto leading-relaxed"><code>{pub.bibtex}</code></pre>
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  @reference "../styles/global.css";
+  .pub-pill {
+    @apply inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-slate-100/90 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/60 hover:text-blue-700 dark:hover:text-blue-400 transition-colors;
+  }
+</style>
+
+<script>
+  // Bind once per page load
+  if (!(window as any).__pubControlsBound) {
+    (window as any).__pubControlsBound = true;
+
+    document.addEventListener('click', async (event) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const toggleBtn = target.closest('.pub-toggle-btn') as HTMLButtonElement | null;
+      if (toggleBtn) {
+        const panelId = toggleBtn.dataset.target;
+        if (!panelId) return;
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+        const isHidden = panel.classList.toggle('hidden');
+        toggleBtn.setAttribute('aria-expanded', String(!isHidden));
+        return;
+      }
+
+      const copyBtn = target.closest('.copy-bibtex-btn') as HTMLButtonElement | null;
+      if (copyBtn) {
+        const bibtex = copyBtn.dataset.bibtex || '';
+        try {
+          await navigator.clipboard.writeText(bibtex);
+          const original = copyBtn.textContent;
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            copyBtn.textContent = original;
+          }, 1800);
+        } catch {
+          copyBtn.textContent = 'Press Ctrl+C';
+        }
+      }
+    });
+  }
+</script>

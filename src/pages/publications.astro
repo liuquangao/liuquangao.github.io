@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PublicationCard from '../components/PublicationCard.astro';
+import { profile } from '../data/profile';
+import { publications } from '../data/publications';
+
+const years = Array.from(new Set(publications.map((p) => p.year))).sort((a, b) => b - a);
+const allTags = Array.from(new Set(publications.flatMap((p) => p.tags))).sort();
+const sortedPubs = [...publications].sort((a, b) => b.year - a.year);
+---
+
+<BaseLayout
+  title={`Publications — ${profile.name}`}
+  description={`Academic publications, preprints, and BibTeX citations by ${profile.name}.`}
+>
+  <header>
+    <h1 class="font-serif text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+      Publications
+    </h1>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      Peer-reviewed journal articles, conference papers, and preprints in robotics, active perception, policy optimization, and time-series forecasting.
+    </p>
+  </header>
+
+  <!-- Interactive Filter Bar -->
+  <section class="mt-6 p-4 rounded-xl bg-slate-50/90 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-3">
+    <div class="flex flex-wrap items-center gap-2 text-xs">
+      <span class="font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">Type:</span>
+      <button type="button" class="filter-chip active" data-filter-group="type" data-value="all">All</button>
+      <button type="button" class="filter-chip" data-filter-group="type" data-value="journal">Journal</button>
+      <button type="button" class="filter-chip" data-filter-group="type" data-value="preprint">Preprint</button>
+
+      <span class="font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-2 mr-1">Year:</span>
+      <button type="button" class="filter-chip active" data-filter-group="year" data-value="all">All</button>
+      {years.map((year) => (
+        <button type="button" class="filter-chip" data-filter-group="year" data-value={String(year)}>
+          {year}
+        </button>
+      ))}
+    </div>
+
+    <div class="flex flex-wrap items-center gap-1.5 text-xs">
+      <span class="font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">Topic:</span>
+      <button type="button" class="filter-chip active" data-filter-group="tag" data-value="all">All</button>
+      {allTags.map((tag) => (
+        <button type="button" class="filter-chip" data-filter-group="tag" data-value={tag}>
+          {tag}
+        </button>
+      ))}
+    </div>
+
+    <div class="flex items-center justify-between pt-1 text-xs text-slate-500 dark:text-slate-400">
+      <span id="pub-count">Showing {sortedPubs.length} of {sortedPubs.length} publications</span>
+      <button id="reset-filters" type="button" class="hidden text-blue-700 dark:text-blue-400 hover:underline cursor-pointer">
+        Reset filters
+      </button>
+    </div>
+  </section>
+
+  <!-- Publication List -->
+  <section id="pub-list" class="mt-6">
+    {sortedPubs.map((pub) => (
+      <PublicationCard pub={pub} showThumbnail={true} />
+    ))}
+  </section>
+
+  <p id="pub-empty" class="hidden mt-10 text-center text-sm text-slate-500 dark:text-slate-400">
+    No publications match the selected filters.
+  </p>
+</BaseLayout>
+
+<style>
+  @reference "../styles/global.css";
+  .filter-chip {
+    @apply px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer;
+  }
+  .filter-chip.active {
+    @apply bg-blue-700 dark:bg-blue-500 text-white border-blue-700 dark:border-blue-500;
+  }
+</style>
+
+<script>
+  const state = { type: 'all', year: 'all', tag: 'all' };
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.pub-item'));
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.filter-chip'));
+  const countEl = document.getElementById('pub-count');
+  const emptyEl = document.getElementById('pub-empty');
+  const resetBtn = document.getElementById('reset-filters');
+
+  function applyFilters() {
+    let visible = 0;
+    for (const item of items) {
+      const matchType = state.type === 'all' || item.dataset.type === state.type;
+      const matchYear = state.year === 'all' || item.dataset.year === state.year;
+      const itemTags = (item.dataset.tags || '').split('|');
+      const matchTag = state.tag === 'all' || itemTags.includes(state.tag);
+
+      const show = matchType && matchYear && matchTag;
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    }
+
+    if (countEl) {
+      countEl.textContent = `Showing ${visible} of ${items.length} publications`;
+    }
+    emptyEl?.classList.toggle('hidden', visible > 0);
+    const hasFilter = state.type !== 'all' || state.year !== 'all' || state.tag !== 'all';
+    resetBtn?.classList.toggle('hidden', !hasFilter);
+  }
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const group = chip.dataset.filterGroup as keyof typeof state;
+      const value = chip.dataset.value || 'all';
+      state[group] = value;
+
+      chips
+        .filter((c) => c.dataset.filterGroup === group)
+        .forEach((c) => c.classList.toggle('active', c === chip));
+
+      applyFilters();
+    });
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    state.type = 'all';
+    state.year = 'all';
+    state.tag = 'all';
+    chips.forEach((c) => c.classList.toggle('active', c.dataset.value === 'all'));
+    applyFilters();
+  });
+</script>
