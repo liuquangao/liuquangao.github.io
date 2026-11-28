@@ -21,7 +21,7 @@ export const profile = {
   },
   email: 'ql337@exeter.ac.uk',
   office: 'Exeter, United Kingdom',
-  avatar: '/images/avatar.svg',
+  avatar: '/images/avatar.jpg',
   avatarAlt: 'Portrait of Quangao Liu',
   siteTitle: 'Quangao Liu — Robotics, Embodied AI & Time Series',
   siteDescription:
