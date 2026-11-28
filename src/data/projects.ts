@@ -19,13 +19,14 @@ export const projects: Project[] = [
     title: 'ActiveReID',
     subtitle: 'Target-Conditioned Active Viewpoint Optimization for Mobile Robots',
     description:
-      'Mobile robot active perception framework accepted to IEEE RA-L 2026 that dynamically optimizes robot viewpoints to improve person re-identification under occlusion and viewpoint shifts.',
+      'Trained on 28,765 3DGS RGB-D frames in NVIDIA Isaac Sim, ActiveReID transfers zero-shot to a Unitree Go2 quadruped—raising Rank-1 ReID accuracy from 31.9% to 84.7% across 144 real-world runs.',
     year: '2025 – Present',
     status: 'Active',
-    tags: ['Robotics', 'Active Vision', 'PyTorch', 'ROS 2'],
-    metrics: 'IEEE RA-L 2026',
+    tags: ['3DGS', 'Active Vision', 'Sim2Real', 'ROS 2', 'Unitree Go2'],
+    metrics: 'IEEE RA-L 2026 · +52.8 pp Real-World Rank-1',
     links: {
-      github: 'https://github.com/liuquangao',
+      demo: '/activereid',
+      github: 'https://github.com/liuquangao/ActiveReID',
       paper: '/publications#liu2026activereid',
     },
   },

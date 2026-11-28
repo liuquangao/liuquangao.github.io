@@ -1,0 +1,785 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../utils/url';
+
+const simBars = [
+  { label: 'Very Heavy Occlusion', before: 39.6, nbv: 80.6, ours: 90.7 },
+  { label: 'Heavy Occlusion', before: 69.9, nbv: 84.1, ours: 92.5 },
+  { label: 'Moderate Occlusion', before: 85.0, nbv: 89.4, ours: 95.2 },
+  { label: 'Light Occlusion', before: 91.2, nbv: 93.4, ours: 98.2 },
+  { label: 'Overall (906 Runs)', before: 71.4, nbv: 86.9, ours: 94.2 },
+];
+
+const realRows = [
+  { level: 'Heavy (>50% occlusion)', runs: 72, disBefore: '0.721 ± 0.060', disAfter: '0.831 ± 0.012', r1Before: '26.4%', r1After: '81.9%' },
+  { level: 'Light (<50% occlusion)', runs: 72, disBefore: '0.790 ± 0.050', disAfter: '0.882 ± 0.011', r1Before: '37.5%', r1After: '87.5%' },
+  { level: 'Overall (Zero-Shot)', runs: 144, disBefore: '0.756 ± 0.065', disAfter: '0.857 ± 0.028', r1Before: '31.9%', r1After: '84.7%' },
+];
+
+const rolloutScenes = [
+  {
+    id: 'scene-1',
+    code: 'SCENE 01 · BREAKROOM / KITCHENETTE',
+    title: 'Seated Target Behind Table & Chairs',
+    occlusion: 'Table & Chair Occlusion',
+    summary:
+      'ActiveReID identifies an unobstructed navigable vantage point beside the dining table. The Unitree Go2 navigates around the chairs and turns to capture a clear frontal ReID view.',
+    video: '/media/clip-scene1-kitchenette.mp4',
+  },
+  {
+    id: 'scene-2',
+    code: 'SCENE 02 · OPEN OFFICE / LAB',
+    title: 'Heavy Cardboard Box & Desk Occlusion',
+    occlusion: 'Heavy Clutter Occlusion',
+    summary:
+      'Starting from a severely occluded view behind stacked moving boxes and workstations, the dense view quality map guides Go2 across the office aisle to a clear full-body viewpoint.',
+    video: '/media/clip-scene2-office.mp4',
+  },
+  {
+    id: 'scene-3',
+    code: 'SCENE 03 · LOBBY & DOORWAY',
+    title: 'Partial Occlusion at Corridor Entrance',
+    occlusion: 'Doorway & Wall Occlusion',
+    summary:
+      'When the target stands partially hidden by a doorway frame, ActiveReID projects the highest-scoring navigable floor goal in the lobby so the robot steps out and aligns cleanly.',
+    video: '/media/clip-scene3-lobby.mp4',
+  },
+  {
+    id: 'scene-3dgs',
+    code: 'SYNTHETIC DATA · ISAAC SIM + SAGE-3D',
+    title: '3DGS Photorealistic RGB-D Supervision',
+    occlusion: '375 Scenes · 28,765 Frames',
+    summary:
+      'Two-pass rendering over physically executable 3DGS indoor scenes generates paired RGB, metric depth, visibility maps, and ReID discriminability maps for zero-shot Sim2Real training.',
+    video: '/media/clip-3dgs-data.mp4',
+  },
+];
+
+const bibtex = `@article{liu2026activereid,
+  title={ActiveReID: Target-Conditioned Active Viewpoint Optimization for Mobile Robot Person Re-Identification},
+  author={Liu, Quangao and Wang, Ning and Zhao, Zixian and Zhang, Xingchen},
+  journal={IEEE Robotics and Automation Letters (RA-L)},
+  year={2026}
+}`;
+---
+
+<BaseLayout
+  title="ActiveReID — Interactive Project Page (IEEE RA-L 2026)"
+  description="ActiveReID: Target-Conditioned Active Viewpoint Optimization for Mobile Robot Person Re-Identification. IEEE RA-L 2026."
+>
+  <!-- Top Scroll Progress Bar -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-0.5 bg-transparent pointer-events-none">
+    <div id="scroll-progress" class="h-full w-0 bg-gradient-to-r from-blue-600 via-sky-500 to-indigo-500 transition-[width] duration-75"></div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <section class="reveal-block">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/60">
+      <span class="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
+      IEEE Robotics and Automation Letters (RA-L) · 2026
+    </div>
+
+    <h1 class="mt-4 font-serif text-3xl sm:text-4xl font-semibold tracking-tight leading-tight text-slate-900 dark:text-slate-50">
+      ActiveReID: Target-Conditioned Active Viewpoint Optimization for Mobile Robot Person Re-Identification
+    </h1>
+
+    <p class="mt-3 text-sm sm:text-base text-slate-700 dark:text-slate-300">
+      <strong class="font-semibold text-slate-900 dark:text-white">Quangao Liu</strong>,
+      Ning Wang, Zixian Zhao, Xingchen Zhang<sup>*</sup>
+    </p>
+    <p class="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+      Fusion Intelligence Laboratory (FIL) · Department of Computer Science · University of Exeter
+    </p>
+
+    <!-- Action Buttons -->
+    <div class="mt-5 flex flex-wrap items-center gap-2.5">
+      <a
+        href="https://github.com/liuquangao/ActiveReID"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-700 text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors shadow-xs"
+      >
+        <span>Code &amp; Data (GitHub)</span>
+        <span>↗</span>
+      </a>
+      <a
+        href={withBase('/blog/3dgs-perception-and-vln-scene-understanding')}
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+      >
+        <span>Blog: 3DGS &amp; VLN Reflections</span>
+        <span>→</span>
+      </a>
+      <a
+        href="#bibtex"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+      >
+        BibTeX ↓
+      </a>
+    </div>
+  </section>
+
+  <!-- KEY METRICS (Scroll Count-Up) -->
+  <section class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3 reveal-block" id="kpi-band">
+    <div class="p-4 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+      <div class="font-mono text-2xl font-bold text-blue-700 dark:text-blue-400">
+        <span class="count-up" data-target="94.2" data-decimals="1">0.0</span>%
+      </div>
+      <div class="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">Sim Rank-1</div>
+      <div class="text-[11px] text-slate-500 dark:text-slate-400">Up from 71.4% (906 runs)</div>
+    </div>
+
+    <div class="p-4 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+      <div class="font-mono text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+        <span class="count-up" data-target="84.7" data-decimals="1">0.0</span>%
+      </div>
+      <div class="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">Real-World Rank-1</div>
+      <div class="text-[11px] text-slate-500 dark:text-slate-400">Up from 31.9% (+52.8 pp)</div>
+    </div>
+
+    <div class="p-4 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+      <div class="font-mono text-2xl font-bold text-slate-900 dark:text-slate-100">
+        <span class="count-up" data-target="28765" data-decimals="0">0</span>
+      </div>
+      <div class="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">3DGS RGB-D Frames</div>
+      <div class="text-[11px] text-slate-500 dark:text-slate-400">375 Isaac Sim scenes</div>
+    </div>
+
+    <div class="p-4 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+      <div class="font-mono text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+        Zero-Shot
+      </div>
+      <div class="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">Unitree Go2 Sim2Real</div>
+      <div class="text-[11px] text-slate-500 dark:text-slate-400">144 runs · 1.5s decision</div>
+    </div>
+  </section>
+
+  <!-- REAL-WORLD VIDEO DEMO -->
+  <section class="mt-12 reveal-block">
+    <div class="flex items-baseline justify-between gap-4">
+      <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
+        Real-World Demo Video (Unitree Go2)
+      </h2>
+      <span class="font-mono text-xs text-slate-500 dark:text-slate-400">ZED 2i · Jetson Orin Nano · ROS 2 Nav2</span>
+    </div>
+
+    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-slate-950 shadow-sm">
+      <video
+        controls
+        playsinline
+        preload="metadata"
+        poster={withBase('/media/activereid-poster.jpg')}
+        class="w-full aspect-video object-contain bg-black"
+      >
+        <source src={withBase('/media/activereid-demo.mp4')} type="video/mp4" />
+        Your browser does not support HTML5 video playback.
+      </video>
+    </div>
+    <p class="mt-2.5 text-xs text-slate-500 dark:text-slate-400">
+      Full narrated overview (1:53). Scroll below to inspect individual real-world inference rollouts by indoor scene.
+    </p>
+  </section>
+
+  <!-- PER-SCENE REAL-WORLD INFERENCE ROLLOUTS -->
+  <section class="mt-14 reveal-block">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <div>
+        <span class="font-mono text-xs uppercase tracking-wider text-blue-700 dark:text-blue-400">
+          Scene-by-Scene Zero-Shot Rollouts
+        </span>
+        <h2 class="mt-0.5 font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          Real-World Inference &amp; 3DGS Data Clips
+        </h2>
+      </div>
+      <span class="font-mono text-xs text-slate-500 dark:text-slate-400">
+        RGB · ZED 2i Depth · Predicted View Quality Map
+      </span>
+    </div>
+
+    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+      {rolloutScenes.map((scene) => (
+        <article class="stagger-card flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-xs">
+          <div class="relative bg-black">
+            <video
+              class="scene-clip w-full aspect-video object-cover"
+              muted
+              loop
+              playsinline
+              controls
+              preload="metadata"
+            >
+              <source src={withBase(scene.video)} type="video/mp4" />
+            </video>
+          </div>
+          <div class="p-4 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">
+                  {scene.code}
+                </span>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  {scene.occlusion}
+                </span>
+              </div>
+              <h3 class="mt-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
+                {scene.title}
+              </h3>
+              <p class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                {scene.summary}
+              </p>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- INTERACTIVE TARGET-CONDITIONED VIEWPOINT OPTIMIZATION PLAYGROUND -->
+  <section class="mt-14 reveal-block">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <div>
+        <span class="font-mono text-xs uppercase tracking-wider text-blue-700 dark:text-blue-400">
+          Interactive Concept Demo
+        </span>
+        <h2 class="mt-0.5 font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          Target-Conditioned Dense View Quality Map
+        </h2>
+      </div>
+      <span class="font-mono text-xs text-slate-500 dark:text-slate-400">
+        Single Forward Pass: f(I, D, b) → (q, S)
+      </span>
+    </div>
+
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      Switch the target person bounding box below to see how ActiveReID dynamically reshapes the dense navigable view quality map <span class="font-mono">S</span> and moves the robot around occluders to maximize both visibility and ReID discriminability.
+    </p>
+
+    <div class="mt-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-xs">
+      <!-- Controls Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            id="btn-target-a"
+            class="demo-target-btn cursor-pointer px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-700 text-white transition-colors"
+          >
+            Target Person A (Desk Occluded)
+          </button>
+          <button
+            type="button"
+            id="btn-target-b"
+            class="demo-target-btn cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-500 transition-colors"
+          >
+            Target Person B (Partition Occluded)
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="btn-move-robot"
+            class="cursor-pointer px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+          >
+            Move Robot to argmax S →
+          </button>
+          <button
+            type="button"
+            id="btn-reset-robot"
+            class="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 transition-colors"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive Canvas -->
+      <div class="relative w-full h-72 sm:h-80 bg-slate-50 dark:bg-slate-950">
+        <canvas id="activereid-canvas" class="w-full h-full block"></canvas>
+      </div>
+
+      <!-- Live Telemetry Readout -->
+      <div class="grid grid-cols-3 gap-3 px-4 py-3 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 font-mono text-xs">
+        <div>
+          <span class="text-slate-500 dark:text-slate-400">Visibility s_vis</span>
+          <div id="demo-vis" class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">0.34</div>
+        </div>
+        <div>
+          <span class="text-slate-500 dark:text-slate-400">Discriminability s_dis</span>
+          <div id="demo-dis" class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">0.72</div>
+        </div>
+        <div>
+          <span class="text-slate-500 dark:text-slate-400">View Quality q</span>
+          <div id="demo-qual" class="mt-0.5 text-sm font-semibold text-blue-700 dark:text-blue-400">0.53 (Move Recommended)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHOD PIPELINE (Staggered Scroll Cards) -->
+  <section class="mt-14 reveal-block">
+    <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
+      Method Overview
+    </h2>
+
+    <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="stagger-card p-5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+        <div class="font-mono text-xs font-semibold text-blue-700 dark:text-blue-400">01 / 3DGS DATA</div>
+        <h3 class="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+          Two-Pass 3DGS Scoring
+        </h3>
+        <p class="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+          In NVIDIA Isaac Sim + SAGE-3D (InteriorGS), candidate viewpoints on a 0.2m grid are scored via two-pass rendering (visibility + TransReID-SSL discriminability) and projected into 28,765 RGB-D frames.
+        </p>
+      </div>
+
+      <div class="stagger-card p-5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+        <div class="font-mono text-xs font-semibold text-blue-700 dark:text-blue-400">02 / ARCHITECTURE</div>
+        <h3 class="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+          Target-Conditioned DFormerv2
+        </h3>
+        <p class="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+          Fuses a spatial position map P(b) at every decoder scale with an RoI-aligned target appearance descriptor injected via FiLM, outputting current quality q and dense navigable map S in one pass.
+        </p>
+      </div>
+
+      <div class="stagger-card p-5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+        <div class="font-mono text-xs font-semibold text-blue-700 dark:text-blue-400">03 / DEPLOYMENT</div>
+        <h3 class="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+          Zero-Shot Real-Robot Transfer
+        </h3>
+        <p class="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+          Backprojects argmax S through ZED 2i depth to a navigable floor goal, verified for traversability and executed via ROS 2 Nav2 on Unitree Go2 without any real-world fine-tuning.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANIMATED QUANTITATIVE RESULTS -->
+  <section class="mt-14 reveal-block" id="sim-chart-section">
+    <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
+      Simulation Results (906 Closed-Loop Runs)
+    </h2>
+    <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
+      Rank-1 ReID accuracy (%) across occlusion levels on 95 held-out SAGE-3D scenes. ActiveReID outperforms the strongest geometric visibility baseline (NBV-res) at every occlusion level.
+    </p>
+
+    <div class="mt-5 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/40 space-y-4">
+      <div class="flex flex-wrap items-center gap-4 text-xs font-mono">
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-slate-300 dark:bg-slate-600"></span>Before Move</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-sky-400/80"></span>NBV-res (Visibility Baseline)</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-blue-700 dark:bg-blue-500"></span>ActiveReID (Ours)</span>
+      </div>
+
+      {simBars.map((row) => (
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-800 dark:text-slate-200">{row.label}</span>
+            <span class="font-mono text-slate-500 dark:text-slate-400">
+              {row.before}% → <strong class="text-blue-700 dark:text-blue-400">{row.ours}%</strong>
+            </span>
+          </div>
+          <div class="space-y-1">
+            <div class="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div class="anim-bar h-full rounded-full bg-slate-300 dark:bg-slate-600" data-width={`${row.before}%`} style="width: 0%"></div>
+            </div>
+            <div class="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div class="anim-bar h-full rounded-full bg-sky-400/85" data-width={`${row.nbv}%`} style="width: 0%"></div>
+            </div>
+            <div class="h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div class="anim-bar h-full rounded-full bg-blue-700 dark:bg-blue-500" data-width={`${row.ours}%`} style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- REAL-WORLD TABLE -->
+  <section class="mt-12 reveal-block">
+    <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
+      Real-World Unitree Go2 Results (144 Runs)
+    </h2>
+    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+      <table class="w-full text-left text-xs sm:text-sm">
+        <thead class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/80 font-mono text-xs text-slate-600 dark:text-slate-400">
+          <tr>
+            <th class="px-4 py-3">Occlusion</th>
+            <th class="px-4 py-3">Runs</th>
+            <th class="px-4 py-3">Dis. (Before → After)</th>
+            <th class="px-4 py-3">Rank-1 (Before → After)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200/70 dark:divide-slate-800/70">
+          {realRows.map((r) => (
+            <tr class={r.level.startsWith('Overall') ? 'font-semibold bg-blue-50/40 dark:bg-blue-950/20' : ''}>
+              <td class="px-4 py-3 text-slate-800 dark:text-slate-200">{r.level}</td>
+              <td class="px-4 py-3 font-mono text-slate-600 dark:text-slate-400">{r.runs}</td>
+              <td class="px-4 py-3 font-mono text-slate-600 dark:text-slate-300">
+                {r.disBefore} → <span class="text-slate-900 dark:text-white">{r.disAfter}</span>
+              </td>
+              <td class="px-4 py-3 font-mono">
+                <span class="text-slate-500">{r.r1Before}</span> →{' '}
+                <span class="font-bold text-blue-700 dark:text-blue-400">{r.r1After}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BIBTEX -->
+  <section id="bibtex" class="mt-12 reveal-block">
+    <div class="flex items-center justify-between">
+      <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">BibTeX</h2>
+      <button
+        type="button"
+        id="copy-bib-btn"
+        class="cursor-pointer px-3 py-1 rounded-md text-xs font-mono border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+      >
+        Copy BibTeX
+      </button>
+    </div>
+    <pre class="mt-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/70 overflow-x-auto font-mono text-xs leading-relaxed text-slate-800 dark:text-slate-200"><code id="bib-code">{bibtex}</code></pre>
+  </section>
+</BaseLayout>
+
+<style>
+  .reveal-block {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal-block.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .stagger-card {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 550ms ease, transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .is-visible .stagger-card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .is-visible .stagger-card:nth-child(2) {
+    transition-delay: 110ms;
+  }
+  .is-visible .stagger-card:nth-child(3) {
+    transition-delay: 220ms;
+  }
+  .anim-bar {
+    transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+</style>
+
+<script is:inline>
+  // 1. Scroll progress bar
+  const progressBar = document.getElementById('scroll-progress');
+  window.addEventListener(
+    'scroll',
+    () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+      if (progressBar) progressBar.style.width = `${pct}%`;
+    },
+    { passive: true }
+  );
+
+  // 2. Scroll reveal + Count-Up + Bar animations
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+
+        // Trigger count-up inside KPI band
+        if (entry.target.id === 'kpi-band') {
+          entry.target.querySelectorAll('.count-up').forEach((el) => {
+            if (el.dataset.done) return;
+            el.dataset.done = '1';
+            const target = parseFloat(el.dataset.target || '0');
+            const decimals = parseInt(el.dataset.decimals || '0', 10);
+            const duration = 900;
+            const start = performance.now();
+            const tick = (now) => {
+              const p = Math.min(1, (now - start) / duration);
+              const eased = 1 - Math.pow(1 - p, 3);
+              const val = target * eased;
+              el.textContent = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString();
+              if (p < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+          });
+        }
+
+        // Trigger horizontal bar growth
+        if (entry.target.id === 'sim-chart-section') {
+          entry.target.querySelectorAll('.anim-bar').forEach((bar, i) => {
+            setTimeout(() => {
+              bar.style.width = bar.dataset.width || '0%';
+            }, i * 45);
+          });
+        }
+
+        revealObserver.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.12 }
+  );
+
+  document.querySelectorAll('.reveal-block').forEach((el) => revealObserver.observe(el));
+
+  // 2b. Auto-play muted scene rollout clips when scrolled into view, pause when offscreen
+  const videoObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const vid = entry.target;
+        if (!(vid instanceof HTMLVideoElement)) return;
+        if (entry.isIntersecting) {
+          vid.play().catch(() => {});
+        } else {
+          vid.pause();
+        }
+      });
+    },
+    { threshold: 0.35 }
+  );
+  document.querySelectorAll('.scene-clip').forEach((v) => videoObserver.observe(v));
+
+  // 3. BibTeX copy
+  const copyBtn = document.getElementById('copy-bib-btn');
+  const bibCode = document.getElementById('bib-code');
+  copyBtn?.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(bibCode?.textContent || '');
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => (copyBtn.textContent = 'Copy BibTeX'), 1500);
+  });
+
+  // 4. Interactive Target-Conditioned View Quality Canvas
+  (() => {
+    const canvas = document.getElementById('activereid-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const btnA = document.getElementById('btn-target-a');
+    const btnB = document.getElementById('btn-target-b');
+    const btnMove = document.getElementById('btn-move-robot');
+    const btnReset = document.getElementById('btn-reset-robot');
+    const visEl = document.getElementById('demo-vis');
+    const disEl = document.getElementById('demo-dis');
+    const qualEl = document.getElementById('demo-qual');
+
+    // Normalized scene coordinates [0..1]
+    const startRobot = { x: 0.16, y: 0.78 };
+    const obstacles = [
+      { x: 0.28, y: 0.44, w: 0.18, h: 0.14, label: 'Desk' },
+      { x: 0.56, y: 0.50, w: 0.12, h: 0.24, label: 'Partition' },
+    ];
+    const targets = {
+      A: {
+        x: 0.38,
+        y: 0.24,
+        label: 'Person A',
+        best: { x: 0.50, y: 0.28 },
+        before: { vis: 0.34, dis: 0.72 },
+        after: { vis: 0.89, dis: 0.93 },
+      },
+      B: {
+        x: 0.78,
+        y: 0.34,
+        label: 'Person B',
+        best: { x: 0.76, y: 0.72 },
+        before: { vis: 0.29, dis: 0.69 },
+        after: { vis: 0.86, dis: 0.91 },
+      },
+    };
+
+    let activeKey = 'A';
+    let robot = { ...startRobot };
+    let moving = false;
+    let progress = 0;
+
+    function updateReadout(p) {
+      const t = targets[activeKey];
+      const vis = t.before.vis + (t.after.vis - t.before.vis) * p;
+      const dis = t.before.dis + (t.after.dis - t.before.dis) * p;
+      const q = 0.5 * (vis + dis);
+      if (visEl) visEl.textContent = vis.toFixed(2);
+      if (disEl) disEl.textContent = dis.toFixed(2);
+      if (qualEl) {
+        qualEl.textContent =
+          p > 0.85 ? `${q.toFixed(2)} (Optimal View Reached)` : `${q.toFixed(2)} (Move Recommended)`;
+      }
+    }
+
+    function setActiveTarget(key) {
+      activeKey = key;
+      robot = { ...startRobot };
+      moving = false;
+      progress = 0;
+      updateReadout(0);
+
+      if (btnA && btnB) {
+        const activeCls = ['bg-blue-700', 'text-white', 'font-semibold'];
+        const idleCls = ['border', 'border-slate-300', 'dark:border-slate-700', 'text-slate-700', 'dark:text-slate-300'];
+        if (key === 'A') {
+          btnA.classList.add(...activeCls);
+          btnA.classList.remove(...idleCls);
+          btnB.classList.remove(...activeCls);
+          btnB.classList.add(...idleCls);
+        } else {
+          btnB.classList.add(...activeCls);
+          btnB.classList.remove(...idleCls);
+          btnA.classList.remove(...activeCls);
+          btnA.classList.add(...idleCls);
+        }
+      }
+    }
+
+    btnA?.addEventListener('click', () => setActiveTarget('A'));
+    btnB?.addEventListener('click', () => setActiveTarget('B'));
+    btnMove?.addEventListener('click', () => {
+      moving = true;
+    });
+    btnReset?.addEventListener('click', () => {
+      robot = { ...startRobot };
+      moving = false;
+      progress = 0;
+      updateReadout(0);
+    });
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function draw() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      const isDark = document.documentElement.classList.contains('dark');
+      const t = targets[activeKey];
+
+      if (moving && progress < 1) {
+        progress = Math.min(1, progress + 0.022);
+        const e = 1 - Math.pow(1 - progress, 3);
+        robot.x = startRobot.x + (t.best.x - startRobot.x) * e;
+        robot.y = startRobot.y + (t.best.y - startRobot.y) * e;
+        updateReadout(e);
+      }
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Floor grid
+      ctx.strokeStyle = isDark ? 'rgba(148,163,184,0.1)' : 'rgba(100,116,139,0.12)';
+      ctx.lineWidth = 1;
+      for (let x = 28; x < w; x += 28) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 28; y < h; y += 28) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // Target-conditioned dense view quality heatmap S around optimal navigable region
+      const gx = t.best.x * w;
+      const gy = t.best.y * h;
+      const grad = ctx.createRadialGradient(gx, gy, 8, gx, gy, Math.min(w, h) * 0.42);
+      grad.addColorStop(0, 'rgba(239, 68, 68, 0.55)');
+      grad.addColorStop(0.35, 'rgba(245, 158, 11, 0.35)');
+      grad.addColorStop(0.7, 'rgba(59, 130, 246, 0.16)');
+      grad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Obstacles (navigability loss suppresses score here)
+      obstacles.forEach((ob) => {
+        ctx.fillStyle = isDark ? '#1e293b' : '#cbd5e1';
+        ctx.strokeStyle = isDark ? '#475569' : '#64748b';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(ob.x * w, ob.y * h, ob.w * w, ob.h * h, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = isDark ? '#94a3b8' : '#475569';
+        ctx.font = '11px "JetBrains Mono", monospace';
+        ctx.fillText(ob.label, ob.x * w + 8, ob.y * h + 18);
+      });
+
+      // Planned Nav2 path
+      ctx.save();
+      ctx.strokeStyle = isDark ? '#38bdf8' : '#1d4ed8';
+      ctx.setLineDash([5, 5]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(startRobot.x * w, startRobot.y * h);
+      ctx.lineTo(t.best.x * w, t.best.y * h);
+      ctx.stroke();
+      ctx.restore();
+
+      // Optimal viewpoint star marker
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(gx, gy, 9, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = isDark ? '#fca5a5' : '#b91c1c';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.fillText('argmax S', gx + 12, gy + 4);
+
+      // Both people (active target highlighted with green bbox)
+      ['A', 'B'].forEach((k) => {
+        const pt = targets[k];
+        const px = pt.x * w;
+        const py = pt.y * h;
+        const isTarget = k === activeKey;
+
+        ctx.fillStyle = isTarget ? '#10b981' : isDark ? '#64748b' : '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(px, py, 11, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (isTarget) {
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(px - 17, py - 17, 34, 34);
+        }
+
+        ctx.fillStyle = isDark ? '#f1f5f9' : '#0f172a';
+        ctx.font = '11px "JetBrains Mono", monospace';
+        ctx.fillText(pt.label, px - 24, py - 22);
+      });
+
+      // Robot (Unitree Go2) + line of sight to target
+      const rx = robot.x * w;
+      const ry = robot.y * h;
+      ctx.strokeStyle = progress > 0.8 ? 'rgba(16,185,129,0.7)' : 'rgba(239,68,68,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(t.x * w, t.y * h);
+      ctx.stroke();
+
+      ctx.fillStyle = isDark ? '#3b82f6' : '#1d4ed8';
+      ctx.beginPath();
+      ctx.arc(rx, ry, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px "JetBrains Mono", monospace';
+      ctx.fillText('Go2', rx - 9, ry + 3);
+
+      requestAnimationFrame(draw);
+    }
+
+    updateReadout(0);
+    requestAnimationFrame(draw);
+  })();
+</script>

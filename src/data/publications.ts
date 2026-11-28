@@ -36,11 +36,12 @@ export const publications: Publication[] = [
     year: 2026,
     type: 'journal',
     selected: true,
-    tags: ['Robotics', 'Active Perception', 'Navigation'],
+    tags: ['Robotics', 'Active Perception', '3DGS', 'Sim2Real'],
     abstract:
-      'Formulates person re-identification on mobile robots as a target-conditioned active perception problem, actively optimizing robot viewpoints to overcome occlusion and viewpoint degradation in real-world environments.',
+      'Given an RGB-D image and a target person bounding box, ActiveReID predicts in a single forward pass a current-view quality score and a dense navigable view quality map. Trained on 28,765 scored photorealistic 3DGS RGB-D images in NVIDIA Isaac Sim, it transfers zero-shot to a Unitree Go2 quadruped, boosting Rank-1 accuracy from 71.4% to 94.2% in simulation (906 runs) and from 31.9% to 84.7% in the real world (144 runs).',
     links: {
-      project: '/projects',
+      code: 'https://github.com/liuquangao/ActiveReID',
+      project: '/activereid',
     },
     bibtex: `@article{liu2026activereid,
   title={ActiveReID: Target-Conditioned Active Viewpoint Optimization for Mobile Robot Person Re-Identification},
