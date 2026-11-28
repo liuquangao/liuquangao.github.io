@@ -153,45 +153,180 @@ const bibtex = `@article{liu2026activereid,
     </div>
   </section>
 
-  <!-- MOTIVATION & OVERVIEW -->
-  <section class="mt-12 reveal-block">
+  <!-- MOTIVATION & OVERVIEW (SCROLL-DRIVEN STORYTELLING) -->
+  <section class="mt-12 reveal-block" id="motivation-scrolly">
     <div class="flex flex-wrap items-baseline justify-between gap-2">
       <div>
         <span class="font-mono text-xs uppercase tracking-wider text-blue-700 dark:text-blue-400">
-          Motivation &amp; Core Insight
+          Motivation &amp; Core Insight · Scroll Story
         </span>
         <h2 class="mt-0.5 font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
           Why Active Viewpoint Optimization for Robot ReID?
         </h2>
       </div>
-      <span class="font-mono text-xs text-slate-500 dark:text-slate-400">Passive ReID → ActiveReID</span>
+      <span class="font-mono text-xs text-slate-500 dark:text-slate-400">Scroll to animate ↓</span>
     </div>
 
-    <div class="mt-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-6 space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-      <p>
-        Most person Re-Identification (ReID) systems are designed for <strong>fixed surveillance cameras</strong>—and even existing robot ReID pipelines treat the current camera viewpoint as given. In cluttered indoor environments, furniture, partitions, and unfavorable viewing angles frequently hide discriminative appearance cues and cause identity mismatches.
-      </p>
-      <p>
-        <strong>ActiveReID</strong> reframes mobile robot ReID as a <strong>target-conditioned active perception problem</strong>. Rather than accepting a degraded view, the robot predicts in a single forward pass both the current-view quality <span class="font-mono text-slate-900 dark:text-slate-100">q</span> and a dense navigable view quality map <span class="font-mono text-slate-900 dark:text-slate-100">S</span> over the floor, guiding the robot to a viewpoint that jointly improves <strong>visibility</strong> and <strong>ReID discriminability</strong>.
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-        <div class="rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-3.5">
-          <div class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">TARGET-CONDITIONED</div>
-          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-            Conditioned on any target bounding box—handles multi-person scenes independently without requiring a gallery at deployment.
+    <div class="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- Left: Scrollable Story Steps -->
+      <div class="lg:col-span-6 space-y-4">
+        <div
+          class="story-step is-active cursor-pointer rounded-2xl border p-5 transition-all duration-300"
+          data-step="0"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">01 / PASSIVE REID LIMITATION</span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">Occluded View</span>
+          </div>
+          <h3 class="mt-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
+            Fixed Viewpoints Fail in Cluttered Indoor Scenes
+          </h3>
+          <p class="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            Most person Re-Identification (ReID) systems are designed for fixed surveillance cameras—and even existing robot ReID pipelines treat the current camera viewpoint as given. In cluttered indoor environments, furniture, partitions, and unfavorable viewing angles frequently hide discriminative appearance cues and cause identity mismatches.
           </p>
         </div>
-        <div class="rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-3.5">
-          <div class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">BEYOND VISIBILITY</div>
-          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-            Jointly optimizes visibility and appearance discriminability, outperforming pure geometric visibility baselines (+7.3% Rank-1 over NBV-res).
+
+        <div
+          class="story-step cursor-pointer rounded-2xl border p-5 transition-all duration-300"
+          data-step="1"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">02 / TARGET-CONDITIONED</span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">Single Forward Pass</span>
+          </div>
+          <h3 class="mt-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
+            Predict Dense View Quality Map S Over Navigable Floor
+          </h3>
+          <p class="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            ActiveReID reframes mobile robot ReID as a target-conditioned active perception problem. Conditioned on any target bounding box, the robot predicts current-view quality <span class="font-mono text-slate-900 dark:text-slate-100">q</span> and a dense navigable view quality map <span class="font-mono text-slate-900 dark:text-slate-100">S</span>—handling multi-person scenes independently without requiring a gallery at deployment.
           </p>
         </div>
-        <div class="rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-3.5">
-          <div class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">ZERO-SHOT 3DGS SIM2REAL</div>
-          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-            Trained purely on 28,765 photorealistic 3DGS RGB-D frames in Isaac Sim; deploys directly on Unitree Go2 without real-world fine-tuning.
+
+        <div
+          class="story-step cursor-pointer rounded-2xl border p-5 transition-all duration-300"
+          data-step="2"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">03 / BEYOND VISIBILITY</span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">+7.3% vs NBV-res</span>
+          </div>
+          <h3 class="mt-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
+            Joint Visibility + Appearance Discriminability
+          </h3>
+          <p class="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            Maximizing geometric visibility alone does not guarantee strong identity cues. ActiveReID jointly optimizes visibility and ReID discriminability, guiding the robot to <span class="font-mono">argmax S</span> and outperforming pure geometric visibility baselines (+7.3% Rank-1 over NBV-res).
           </p>
+        </div>
+
+        <div
+          class="story-step cursor-pointer rounded-2xl border p-5 transition-all duration-300"
+          data-step="3"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">04 / ZERO-SHOT 3DGS SIM2REAL</span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">31.9% → 84.7%</span>
+          </div>
+          <h3 class="mt-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
+            From Isaac Sim 3DGS Straight to Unitree Go2
+          </h3>
+          <p class="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            Trained purely on 28,765 photorealistic 3DGS RGB-D frames in NVIDIA Isaac Sim (375 SAGE-3D scenes), ActiveReID deploys directly on a real Unitree Go2 quadruped without real-world fine-tuning, lifting real-world Rank-1 accuracy from 31.9% to 84.7%.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Sticky Animated Visual Stage -->
+      <div class="lg:col-span-6 lg:sticky lg:top-24">
+        <div
+          id="story-stage"
+          data-stage="0"
+          class="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/60 overflow-hidden shadow-sm"
+        >
+          <!-- Stage Header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90">
+            <span id="stage-badge" class="font-mono text-[11px] font-semibold text-rose-600 dark:text-rose-400">
+              STAGE 01 // PASSIVE OCCLUDED VIEW
+            </span>
+            <div class="flex items-center gap-1.5">
+              <span class="stage-dot w-2 h-2 rounded-full bg-blue-600 transition-all" data-dot="0"></span>
+              <span class="stage-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 transition-all" data-dot="1"></span>
+              <span class="stage-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 transition-all" data-dot="2"></span>
+              <span class="stage-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 transition-all" data-dot="3"></span>
+            </div>
+          </div>
+
+          <!-- Animated SVG Scene -->
+          <div class="relative p-4 bg-slate-50/50 dark:bg-slate-950/60">
+            <svg viewBox="0 0 420 270" class="w-full h-auto block">
+              <defs>
+                <pattern id="story-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" stroke-opacity="0.08" stroke-width="1" />
+                </pattern>
+                <radialGradient id="quality-heat" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ef4444" stop-opacity="0.65" />
+                  <stop offset="45%" stop-color="#f59e0b" stop-opacity="0.38" />
+                  <stop offset="80%" stop-color="#3b82f6" stop-opacity="0.16" />
+                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+
+              <rect width="420" height="270" rx="12" fill="url(#story-grid)" />
+
+              <!-- Dense View Quality Heatmap S (fades in at Stage 1+) -->
+              <circle id="svg-heatmap" cx="292" cy="148" r="88" fill="url(#quality-heat)" class="transition-all duration-700 opacity-0 scale-75 origin-center" />
+
+              <!-- Furniture / Partition Occluder -->
+              <rect x="132" y="106" width="96" height="44" rx="8" class="fill-slate-300 dark:fill-slate-700 stroke-slate-400 dark:stroke-slate-600" stroke-width="1.5" />
+              <text x="180" y="132" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" class="fill-slate-600 dark:fill-slate-300">OCCLUDER</text>
+
+              <!-- Target Person -->
+              <g id="svg-target">
+                <circle cx="230" cy="56" r="14" fill="#10b981" />
+                <text x="230" y="60" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#fff">ID</text>
+                <!-- Target BBox highlight (activates Stage 1+) -->
+                <rect id="svg-bbox" x="210" y="36" width="40" height="40" rx="4" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4 3" class="transition-opacity duration-500 opacity-30" />
+                <text x="230" y="28" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" class="fill-slate-700 dark:fill-slate-300">Target Person</text>
+              </g>
+
+              <!-- Blocked passive sightline (Stage 0-1) -->
+              <line id="svg-sight-blocked" x1="88" y1="210" x2="220" y2="66" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 5" class="transition-opacity duration-500 opacity-90" />
+
+              <!-- Clear active sightline (Stage 2-3) -->
+              <line id="svg-sight-clear" x1="292" y1="148" x2="236" y2="68" stroke="#10b981" stroke-width="2.5" class="transition-opacity duration-500 opacity-0" />
+
+              <!-- Planned robot trajectory curve (Stage 1+) -->
+              <path id="svg-path" d="M 88 210 Q 210 232, 292 148" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6 5" class="transition-opacity duration-500 opacity-0" />
+
+              <!-- argmax S target marker (Stage 1+) -->
+              <g id="svg-argmax" class="transition-opacity duration-500 opacity-0">
+                <circle cx="292" cy="148" r="11" fill="none" stroke="#ef4444" stroke-width="2" />
+                <text x="308" y="152" font-family="JetBrains Mono, monospace" font-size="10" fill="#dc2626">argmax S</text>
+              </g>
+
+              <!-- Unitree Go2 Robot (smoothly translates from occluded start to optimal viewpoint!) -->
+              <g id="svg-robot" style="transform: translate(88px, 210px); transition: transform 850ms cubic-bezier(0.22, 1, 0.36, 1);">
+                <circle cx="0" cy="0" r="16" fill="#1d4ed8" />
+                <circle cx="0" cy="0" r="22" fill="none" stroke="#3b82f6" stroke-opacity="0.35" stroke-width="1.5" />
+                <text x="0" y="4" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#ffffff">Go2</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Stage Live Metrics Footer -->
+          <div class="grid grid-cols-3 gap-2 px-4 py-3 border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 font-mono text-xs">
+            <div>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">VISIBILITY</span>
+              <div id="stage-vis" class="mt-0.5 font-semibold text-rose-600 dark:text-rose-400">0.456</div>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">DISCRIMINABILITY</span>
+              <div id="stage-dis" class="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">0.756</div>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">RANK-1 REID</span>
+              <div id="stage-r1" class="mt-0.5 font-semibold text-rose-600 dark:text-rose-400">31.9%</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -490,6 +625,27 @@ const bibtex = `@article{liu2026activereid,
   .anim-bar {
     transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .story-step {
+    border-color: rgba(203, 213, 225, 0.7);
+    background-color: rgba(255, 255, 255, 0.65);
+    opacity: 0.62;
+    transform: translateX(0);
+  }
+  :global(.dark) .story-step {
+    border-color: rgba(30, 41, 59, 0.85);
+    background-color: rgba(15, 23, 42, 0.35);
+  }
+  .story-step.is-active {
+    border-color: #2563eb;
+    background-color: #ffffff;
+    opacity: 1;
+    transform: translateX(4px);
+    box-shadow: 0 8px 24px -12px rgba(37, 99, 235, 0.22);
+  }
+  :global(.dark) .story-step.is-active {
+    border-color: #3b82f6;
+    background-color: rgba(15, 23, 42, 0.85);
+  }
 </style>
 
 <script is:inline>
@@ -566,6 +722,135 @@ const bibtex = `@article{liu2026activereid,
     { threshold: 0.35 }
   );
   document.querySelectorAll('.scene-clip').forEach((v) => videoObserver.observe(v));
+
+  // 2c. Scroll-driven Motivation Scrollytelling controller
+  (() => {
+    const steps = Array.from(document.querySelectorAll('.story-step'));
+    const badge = document.getElementById('stage-badge');
+    const visEl = document.getElementById('stage-vis');
+    const disEl = document.getElementById('stage-dis');
+    const r1El = document.getElementById('stage-r1');
+    const dots = document.querySelectorAll('.stage-dot');
+
+    const heatmap = document.getElementById('svg-heatmap');
+    const bbox = document.getElementById('svg-bbox');
+    const sightBlocked = document.getElementById('svg-sight-blocked');
+    const sightClear = document.getElementById('svg-sight-clear');
+    const pathEl = document.getElementById('svg-path');
+    const argmaxEl = document.getElementById('svg-argmax');
+    const robotEl = document.getElementById('svg-robot');
+
+    const states = [
+      {
+        badge: 'STAGE 01 // PASSIVE OCCLUDED VIEW',
+        badgeCls: 'text-rose-600 dark:text-rose-400',
+        vis: '0.456',
+        dis: '0.756',
+        r1: '31.9% (Real)',
+        r1Cls: 'text-rose-600 dark:text-rose-400',
+        heatmap: false,
+        bbox: false,
+        blocked: true,
+        clear: false,
+        path: false,
+        argmax: false,
+        robotPos: 'translate(88px, 210px)',
+      },
+      {
+        badge: 'STAGE 02 // DENSE VIEW QUALITY MAP S',
+        badgeCls: 'text-blue-700 dark:text-blue-400',
+        vis: '0.456 → ?',
+        dis: 'Scoring Floor',
+        r1: 'Single Pass',
+        r1Cls: 'text-blue-700 dark:text-blue-400',
+        heatmap: true,
+        bbox: true,
+        blocked: true,
+        clear: false,
+        path: true,
+        argmax: true,
+        robotPos: 'translate(88px, 210px)',
+      },
+      {
+        badge: 'STAGE 03 // MOVE TO OPTIMAL VIEWPOINT',
+        badgeCls: 'text-amber-600 dark:text-amber-400',
+        vis: '0.794 (Sim)',
+        dis: '0.900 (Sim)',
+        r1: '94.2% (Sim)',
+        r1Cls: 'text-blue-700 dark:text-blue-400',
+        heatmap: true,
+        bbox: true,
+        blocked: false,
+        clear: true,
+        path: true,
+        argmax: true,
+        robotPos: 'translate(292px, 148px)',
+      },
+      {
+        badge: 'STAGE 04 // ZERO-SHOT 3DGS → UNITREE GO2',
+        badgeCls: 'text-emerald-600 dark:text-emerald-400',
+        vis: 'Clear View',
+        dis: '0.857 (Real)',
+        r1: '84.7% (+52.8 pp)',
+        r1Cls: 'text-emerald-600 dark:text-emerald-400',
+        heatmap: true,
+        bbox: true,
+        blocked: false,
+        clear: true,
+        path: true,
+        argmax: true,
+        robotPos: 'translate(292px, 148px)',
+      },
+    ];
+
+    function activateStep(idx) {
+      const s = states[idx] || states[0];
+      steps.forEach((el, i) => el.classList.toggle('is-active', i === idx));
+      dots.forEach((d, i) => {
+        d.className = `stage-dot h-2 rounded-full transition-all ${
+          i === idx ? 'w-5 bg-blue-600' : 'w-2 bg-slate-300 dark:bg-slate-700'
+        }`;
+      });
+      if (badge) {
+        badge.textContent = s.badge;
+        badge.className = `font-mono text-[11px] font-semibold ${s.badgeCls}`;
+      }
+      if (visEl) visEl.textContent = s.vis;
+      if (disEl) disEl.textContent = s.dis;
+      if (r1El) {
+        r1El.textContent = s.r1;
+        r1El.className = `mt-0.5 font-semibold ${s.r1Cls}`;
+      }
+      if (heatmap) {
+        heatmap.style.opacity = s.heatmap ? '1' : '0';
+        heatmap.style.transform = s.heatmap ? 'scale(1)' : 'scale(0.75)';
+      }
+      if (bbox) bbox.style.opacity = s.bbox ? '1' : '0.3';
+      if (sightBlocked) sightBlocked.style.opacity = s.blocked ? '0.9' : '0';
+      if (sightClear) sightClear.style.opacity = s.clear ? '1' : '0';
+      if (pathEl) pathEl.style.opacity = s.path ? '1' : '0';
+      if (argmaxEl) argmaxEl.style.opacity = s.argmax ? '1' : '0';
+      if (robotEl) robotEl.style.transform = s.robotPos;
+    }
+
+    const stepObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = parseInt(entry.target.getAttribute('data-step') || '0', 10);
+            activateStep(idx);
+          }
+        });
+      },
+      { rootMargin: '-32% 0px -38% 0px', threshold: 0.1 }
+    );
+
+    steps.forEach((el, i) => {
+      stepObserver.observe(el);
+      el.addEventListener('click', () => activateStep(i));
+    });
+    activateStep(0);
+  })();
 
   // 3. BibTeX copy
   const copyBtn = document.getElementById('copy-bib-btn');
