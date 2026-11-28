@@ -153,30 +153,48 @@ const bibtex = `@article{liu2026activereid,
     </div>
   </section>
 
-  <!-- REAL-WORLD VIDEO DEMO -->
+  <!-- MOTIVATION & OVERVIEW -->
   <section class="mt-12 reveal-block">
-    <div class="flex items-baseline justify-between gap-4">
-      <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
-        Real-World Demo Video (Unitree Go2)
-      </h2>
-      <span class="font-mono text-xs text-slate-500 dark:text-slate-400">ZED 2i · Jetson Orin Nano · ROS 2 Nav2</span>
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <div>
+        <span class="font-mono text-xs uppercase tracking-wider text-blue-700 dark:text-blue-400">
+          Motivation &amp; Core Insight
+        </span>
+        <h2 class="mt-0.5 font-serif text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          Why Active Viewpoint Optimization for Robot ReID?
+        </h2>
+      </div>
+      <span class="font-mono text-xs text-slate-500 dark:text-slate-400">Passive ReID → ActiveReID</span>
     </div>
 
-    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-slate-950 shadow-sm">
-      <video
-        controls
-        playsinline
-        preload="metadata"
-        poster={withBase('/media/activereid-poster.jpg')}
-        class="w-full aspect-video object-contain bg-black"
-      >
-        <source src={withBase('/media/activereid-demo.mp4')} type="video/mp4" />
-        Your browser does not support HTML5 video playback.
-      </video>
+    <div class="mt-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-6 space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+      <p>
+        Most person Re-Identification (ReID) systems are designed for <strong>fixed surveillance cameras</strong>—and even existing robot ReID pipelines treat the current camera viewpoint as given. In cluttered indoor environments, furniture, partitions, and unfavorable viewing angles frequently hide discriminative appearance cues and cause identity mismatches.
+      </p>
+      <p>
+        <strong>ActiveReID</strong> reframes mobile robot ReID as a <strong>target-conditioned active perception problem</strong>. Rather than accepting a degraded view, the robot predicts in a single forward pass both the current-view quality <span class="font-mono text-slate-900 dark:text-slate-100">q</span> and a dense navigable view quality map <span class="font-mono text-slate-900 dark:text-slate-100">S</span> over the floor, guiding the robot to a viewpoint that jointly improves <strong>visibility</strong> and <strong>ReID discriminability</strong>.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-3.5">
+          <div class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">TARGET-CONDITIONED</div>
+          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            Conditioned on any target bounding box—handles multi-person scenes independently without requiring a gallery at deployment.
+          </p>
+        </div>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-3.5">
+          <div class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">BEYOND VISIBILITY</div>
+          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            Jointly optimizes visibility and appearance discriminability, outperforming pure geometric visibility baselines (+7.3% Rank-1 over NBV-res).
+          </p>
+        </div>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-3.5">
+          <div class="font-mono text-[11px] font-semibold text-blue-700 dark:text-blue-400">ZERO-SHOT 3DGS SIM2REAL</div>
+          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            Trained purely on 28,765 photorealistic 3DGS RGB-D frames in Isaac Sim; deploys directly on Unitree Go2 without real-world fine-tuning.
+          </p>
+        </div>
+      </div>
     </div>
-    <p class="mt-2.5 text-xs text-slate-500 dark:text-slate-400">
-      Full narrated overview (1:53). Scroll below to inspect individual real-world inference rollouts by indoor scene.
-    </p>
   </section>
 
   <!-- PER-SCENE REAL-WORLD INFERENCE ROLLOUTS -->
